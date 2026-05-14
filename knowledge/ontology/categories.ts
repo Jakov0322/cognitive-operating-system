@@ -1,0 +1,16 @@
+export enum KnowledgeCategory {
+  ProjectIdentity = "project_identity",
+  BusinessIdea = "business_idea",
+  DomainModel = "domain_model",
+  Architecture = "architecture",
+  CodeStyle = "code_style",
+  TechnicalDecision = "technical_decision",
+  ProductDecision = "product_decision",
+  Workflow = "workflow",
+  TeamBehavior = "team_behavior",
+  HistoricalEvolution = "historical_evolution",
+  RiskArea = "risk_area",
+  RecurringProblem = "recurring_problem",
+  AgentSkill = "agent_skill",
+  EvidenceSource = "evidence_source",
+}

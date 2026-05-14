@@ -1,0 +1,15 @@
+export enum RelationType {
+  DependsOn = "depends_on",
+  PartOf = "part_of",
+  Owns = "owns",
+  Modifies = "modifies",
+  Introduces = "introduces",
+  Resolves = "resolves",
+  Causes = "causes",
+  Discusses = "discusses",
+  DerivedFrom = "derived_from",
+  GeneratedFrom = "generated_from",
+  Supersedes = "supersedes",
+  ConflictsWith = "conflicts_with",
+  RelatedTo = "related_to",
+}
