@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "scan:git": "tsx connectors/local/git/scan-git.ts"
+    "scan:git": "tsx connectors/local/git/scan-git.ts",
+    "extract:entities": "tsx core/entity-extraction/run-entity-extraction.ts",
+    "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",

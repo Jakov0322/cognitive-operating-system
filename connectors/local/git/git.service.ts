@@ -11,8 +11,8 @@ export class GitService {
       "git",
       [
         "log",
-        "--pretty=format:%H%x1f%an%x1f%ae%x1f%aI%x1f%s%x1e",
         "--name-only",
+        "--pretty=format:%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s",
       ],
       {
         cwd: this.repositoryPath,
