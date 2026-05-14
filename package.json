@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "scan:git": "tsx connectors/local/git/scan-git.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "tsx": "^4.22.0",
+    "typescript": "^6.0.3"
+  }
+}
