@@ -2,7 +2,9 @@
   "scripts": {
     "scan:git": "tsx connectors/local/git/scan-git.ts",
     "extract:entities": "tsx core/entity-extraction/run-entity-extraction.ts",
-    "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts"
+    "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts",
+    "project:module-activity": "tsx core/timeline-engine/build-module-activity.ts",
+    "render:module-activity": "tsx outputs/reports/render-module-activity.ts"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",

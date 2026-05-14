@@ -1,6 +1,7 @@
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { Relation } from "../../knowledge/schemas/relation";
 import { RelationType } from "../../knowledge/ontology/relations";
+import { shouldIgnoreFile } from "../entity-extraction/path-filters";
 
 function normalizePersonId(name: string, email?: string): string {
   const value = email ?? name;
@@ -36,6 +37,7 @@ export function extractAuthorshipRelations(events: NormalizedEvent[]): Relation[
     const personId = normalizePersonId(event.actor, email);
 
     for (const file of event.relatedFiles ?? []) {
+      if (shouldIgnoreFile(file)) continue;
       const moduleName = inferModuleName(file);
       if (!moduleName) continue;
 

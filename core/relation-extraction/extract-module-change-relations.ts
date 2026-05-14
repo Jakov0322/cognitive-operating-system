@@ -1,5 +1,6 @@
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { Relation } from "../../knowledge/schemas/relation";
+import { shouldIgnoreFile } from "../entity-extraction/path-filters";
 import { RelationType } from "../../knowledge/ontology/relations";
 
 function inferModuleName(filePath: string): string | null {
@@ -22,6 +23,7 @@ export function extractModuleChangeRelations(
     const modules = Array.from(
       new Set(
         (event.relatedFiles ?? [])
+          .filter((file) => !shouldIgnoreFile(file))
           .map(inferModuleName)
           .filter((value): value is string => Boolean(value))
       )
