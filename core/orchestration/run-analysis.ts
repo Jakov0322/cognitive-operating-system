@@ -54,7 +54,14 @@ async function main() {
     join(root, "knowledge", "projections", "module-activity")
   );
 
+  await run("npm", ["run", "infer:hotspots", "--", moduleActivityFile]);
+
+  const hotspotsFile = await latestJsonFile(
+    join(root, "knowledge", "projections", "hotspots")
+  );
+
   await run("npm", ["run", "render:module-activity", "--", moduleActivityFile]);
+  await run("npm", ["run", "render:hotspots", "--", hotspotsFile]);
 
   console.log("\nAnalysis completed.");
 }

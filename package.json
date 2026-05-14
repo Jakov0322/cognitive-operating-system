@@ -5,7 +5,9 @@
     "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts",
     "project:module-activity": "tsx core/timeline-engine/build-module-activity.ts",
     "render:module-activity": "tsx outputs/reports/render-module-activity.ts",
-    "analyze": "tsx core/orchestration/run-analysis.ts"
+    "analyze": "tsx core/orchestration/run-analysis.ts",
+    "infer:hotspots": "tsx core/inference/infer-hotspots.ts",
+    "render:hotspots": "tsx outputs/reports/render-hotspots.ts"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",
