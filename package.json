@@ -13,12 +13,17 @@
     "infer:hotspots": "tsx core/inference/infer-hotspots.ts",
     "infer:architectural-invariants": "tsx core/inference/infer-architectural-invariants.ts",
     "infer:expertise": "tsx core/inference/infer-expertise.ts",
+    "infer:ownership-graph": "tsx core/inference/build-ownership-graph.ts",
+    "infer:bus-factor": "tsx core/inference/infer-bus-factor.ts",
+    "infer:architectural-drift": "tsx core/inference/infer-architectural-drift.ts",
 
     "render:module-activity": "tsx outputs/reports/render-module-activity.ts",
     "render:hotspots": "tsx outputs/reports/render-hotspots.ts",
     "render:timeline": "tsx outputs/reports/render-timeline.ts",
     "render:architectural-invariants": "tsx outputs/reports/render-architectural-invariants.ts",
     "render:expertise": "tsx outputs/reports/render-expertise.ts",
+    "render:ownership-graph": "tsx outputs/reports/render-ownership-graph.ts",
+    "render:bus-factor": "tsx outputs/reports/render-bus-factor.ts",
 
     "render:agent-context": "tsx outputs/agent-context/render-agent-context.ts",
     "render:agent-workflow": "tsx outputs/agent-context/render-agent-workflow.ts",
@@ -29,6 +34,7 @@
     "render:skill:project-timeline": "tsx outputs/skills/render-project-timeline-skill.ts",
     "render:skill:onboarding": "tsx outputs/skills/render-onboarding-skill.ts",
     "render:skill:index": "tsx outputs/skills/render-skill-index.ts",
+    "render:skill:human-cognition": "tsx outputs/skills/render-human-cognition-skill.ts",
 
     "context:pack": "tsx outputs/context-packs/render-context-pack.ts",
     "context:connectors": "tsx outputs/context-packs/render-context-pack.ts connectors",

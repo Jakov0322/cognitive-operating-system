@@ -58,6 +58,8 @@ async function main() {
   await run("npm", ["run", "infer:hotspots", "--", moduleActivityFile]);
   await run("npm", ["run", "infer:architectural-invariants"]);
   await run("npm", ["run", "infer:expertise"]);
+  await run("npm", ["run", "infer:ownership-graph"]);
+  await run("npm", ["run", "infer:bus-factor"]);
 
   const hotspotsFile = await latestJsonFile(
     join(root, "knowledge", "projections", "hotspots")
@@ -72,7 +74,8 @@ async function main() {
   await run("npm", ["run", "render:timeline", "--", timelineFile]);
   await run("npm", ["run", "render:architectural-invariants"]);
   await run("npm", ["run", "render:expertise"]);
-
+  await run("npm", ["run", "render:ownership-graph"]);
+  await run("npm", ["run", "render:bus-factor"]);
   await run("npm", ["run", "render:agent-context"]);
   await run("npm", ["run", "render:agent-workflow"]);
 
@@ -81,6 +84,7 @@ async function main() {
   await run("npm", ["run", "render:skill:codebase-navigation"]);
   await run("npm", ["run", "render:skill:project-timeline"]);
   await run("npm", ["run", "render:skill:onboarding"]);
+  await run("npm", ["run", "render:skill:human-cognition"]);
   await run("npm", ["run", "render:skill:index"]);
 
   await run("npm", ["run", "context:core"]);
@@ -94,6 +98,12 @@ async function main() {
     await run("npm", ["run", "compare:snapshots"]);
   } catch {
     console.log("Skipping snapshot comparison.");
+  }
+
+  try {
+    await run("npm", ["run", "infer:architectural-drift"]);
+  } catch {
+    console.log("Skipping architectural drift inference.");
   }
 
   console.log("\nAnalysis completed.");
