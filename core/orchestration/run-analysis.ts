@@ -43,6 +43,7 @@ async function main() {
 
   await run("npm", ["run", "extract:entities", "--", normalizedFile]);
   await run("npm", ["run", "extract:relations", "--", normalizedFile]);
+  await run("npm", ["run", "project:timeline", "--", normalizedFile]);
 
   const relationsFile = await latestJsonFile(
     join(root, "knowledge", "graph", "relations")
@@ -60,8 +61,24 @@ async function main() {
     join(root, "knowledge", "projections", "hotspots")
   );
 
+  const timelineFile = await latestJsonFile(
+    join(root, "knowledge", "projections", "timeline")
+  );
+
   await run("npm", ["run", "render:module-activity", "--", moduleActivityFile]);
   await run("npm", ["run", "render:hotspots", "--", hotspotsFile]);
+  await run("npm", ["run", "render:timeline", "--", timelineFile]);
+  await run("npm", ["run", "render:agent-context"]);
+  await run("npm", ["run", "render:skill:risk-hotspots"]);
+  await run("npm", ["run", "render:skill:architecture"]);
+  await run("npm", ["run", "render:skill:codebase-navigation"]);
+  await run("npm", ["run", "render:skill:project-timeline"]);
+  await run("npm", ["run", "render:skill:onboarding"]);
+  await run("npm", ["run", "render:skill:index"]);
+  await run("npm", ["run", "context:core"]);
+  await run("npm", ["run", "context:connectors"]);
+  await run("npm", ["run", "context:knowledge"]);
+  await run("npm", ["run", "context:outputs"]);
 
   console.log("\nAnalysis completed.");
 }

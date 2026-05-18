@@ -1,6 +1,7 @@
 import { Entity } from "../../knowledge/schemas/entity";
 import { EntityType } from "../../knowledge/ontology/entities";
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
+import { shouldIgnoreForModuleInference } from "../shared/path-filters";
 
 function inferModuleName(filePath: string): string | null {
   const segments = filePath.split(/[\\/]/).filter(Boolean);
@@ -24,44 +25,15 @@ function inferModuleName(filePath: string): string | null {
   return segments[0];
 }
 
-function shouldIgnoreFile(filePath: string): boolean {
-  const normalized = filePath.replace(/\\/g, "/");
-
-  const ignoredExactFiles = new Set([
-    ".gitignore",
-    "package.json",
-    "package-lock.json",
-    "pnpm-lock.yaml",
-    "yarn.lock",
-    "README.md",
-    "PROJECT_STRUCTURE.md",
-    "tsconfig.json",
-  ]);
-
-  if (ignoredExactFiles.has(normalized)) {
-    return true;
-  }
-
-  const ignoredPrefixes = [
-    "node_modules/",
-    "dist/",
-    "build/",
-    "coverage/",
-    ".next/",
-    ".git/",
-  ];
-
-  return ignoredPrefixes.some((prefix) => normalized.startsWith(prefix));
-}
-
 export function extractModules(events: NormalizedEvent[]): Entity[] {
   const entities = new Map<string, Entity>();
 
   for (const event of events) {
     for (const file of event.relatedFiles ?? []) {
-      if (shouldIgnoreFile(file)) {
+      if (shouldIgnoreForModuleInference(file)) {
         continue;
       }
+
       const moduleName = inferModuleName(file);
 
       if (!moduleName) {

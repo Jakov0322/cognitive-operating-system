@@ -1,5 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { ConfidenceScore } from "../../knowledge/ontology/confidence";
+import { confidenceFromWeightedCount } from "../shared/confidence";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -18,6 +20,7 @@ type HotspotReason =
 type ModuleHotspot = {
   moduleId: string;
   hotspotScore: number;
+  confidence: ConfidenceScore;
   reasons: HotspotReason[];
   metrics: {
     changeCount: number;
@@ -60,15 +63,22 @@ function inferHotspots(
         changeScore * 0.5 + couplingScore * 0.35 + authorScore * 0.15
       );
 
+      const hotspotConfidence = confidenceFromWeightedCount(
+        module.evidenceIds.length
+      );
+
       const reasons: HotspotReason[] = [];
 
       if (changeScore >= 0.75) reasons.push("high_change_frequency");
       if (couplingScore >= 0.75) reasons.push("high_module_coupling");
-      if (authorScore >= 0.75) reasons.push("multiple_authors");
+      if (module.authors.length > 1) {
+        reasons.push("multiple_authors");
+      }
 
       return {
         moduleId: module.moduleId,
         hotspotScore,
+        confidence: hotspotConfidence,
         reasons,
         metrics: {
           changeCount: module.changeCount,

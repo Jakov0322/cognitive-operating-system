@@ -8,7 +8,22 @@
     "analyze": "tsx core/orchestration/run-analysis.ts",
     "infer:hotspots": "tsx core/inference/infer-hotspots.ts",
     "render:hotspots": "tsx outputs/reports/render-hotspots.ts",
-    "github:fetch": "tsx connectors/github/fetch-github.ts"
+    "github:fetch": "tsx connectors/github/fetch-github.ts",
+    "project:timeline": "tsx core/timeline-engine/build-activity-timeline.ts",
+    "render:timeline": "tsx outputs/reports/render-timeline.ts",
+    "render:agent-context": "tsx outputs/agent-context/render-agent-context.ts",
+    "render:skill:risk-hotspots": "tsx outputs/skills/render-risk-hotspots-skill.ts",
+    "render:skill:architecture": "tsx outputs/skills/render-architecture-skill.ts",
+    "render:skill:codebase-navigation": "tsx outputs/skills/render-codebase-navigation-skill.ts",
+    "render:skill:project-timeline": "tsx outputs/skills/render-project-timeline-skill.ts",
+    "render:skill:onboarding": "tsx outputs/skills/render-onboarding-skill.ts",
+    "render:skill:index": "tsx outputs/skills/render-skill-index.ts",
+    "context:pack": "tsx outputs/context-packs/render-context-pack.ts",
+    "context:connectors": "tsx outputs/context-packs/render-context-pack.ts connectors",
+    "context:core": "tsx outputs/context-packs/render-context-pack.ts core",
+    "context:knowledge": "tsx outputs/context-packs/render-context-pack.ts knowledge",
+    "context:outputs": "tsx outputs/context-packs/render-context-pack.ts outputs",
+    "context:task": "tsx outputs/context-packs/render-task-context-pack.ts"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",

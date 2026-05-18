@@ -1,6 +1,7 @@
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { Relation } from "../../knowledge/schemas/relation";
-import { shouldIgnoreFile } from "../entity-extraction/path-filters";
+import { classifyEvent } from "../shared/event-classification";
+import { shouldIgnoreForModuleInference } from "../shared/path-filters";
 import { RelationType } from "../../knowledge/ontology/relations";
 
 function inferModuleName(filePath: string): string | null {
@@ -14,16 +15,28 @@ function inferModuleName(filePath: string): string | null {
   return segments[0];
 }
 
+function eventWeight(event: NormalizedEvent): number {
+  const classification = classifyEvent(event);
+
+  if (classification === "scaffold") return 0.25;
+  if (classification === "maintenance") return 0.5;
+
+  return 1;
+}
+
 export function extractModuleChangeRelations(
   events: NormalizedEvent[]
 ): Relation[] {
   const relations = new Map<string, Relation>();
 
   for (const event of events) {
+    const classification = classifyEvent(event);
+    const weight = eventWeight(event);
+
     const modules = Array.from(
       new Set(
         (event.relatedFiles ?? [])
-          .filter((file) => !shouldIgnoreFile(file))
+          .filter((file) => !shouldIgnoreForModuleInference(file))
           .map(inferModuleName)
           .filter((value): value is string => Boolean(value))
       )
@@ -49,7 +62,8 @@ export function extractModuleChangeRelations(
             evidenceIds: event.evidenceIds ?? [],
             metadata: {
               source: "co-change",
-              coChangeCount: 1,
+              coChangeCount: weight,
+              eventClassifications: [classification],
             },
             createdAt: now,
             updatedAt: now,
@@ -64,7 +78,13 @@ export function extractModuleChangeRelations(
           existing.metadata = {
             ...existing.metadata,
             coChangeCount:
-              ((existing.metadata?.coChangeCount as number) ?? 1) + 1,
+              ((existing.metadata?.coChangeCount as number) ?? 0) + weight,
+            eventClassifications: Array.from(
+              new Set([
+                ...((existing.metadata?.eventClassifications as string[]) ?? []),
+                classification,
+              ])
+            ),
           };
 
           existing.updatedAt = now;

@@ -1,7 +1,8 @@
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { Relation } from "../../knowledge/schemas/relation";
 import { RelationType } from "../../knowledge/ontology/relations";
-import { shouldIgnoreFile } from "../entity-extraction/path-filters";
+import { shouldIgnoreForModuleInference } from "../shared/path-filters";
+import { classifyEvent } from "../shared/event-classification";
 
 function normalizePersonId(name: string, email?: string): string {
   const value = email ?? name;
@@ -10,6 +11,15 @@ function normalizePersonId(name: string, email?: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")}`;
+}
+
+function eventWeight(event: NormalizedEvent): number {
+  const classification = classifyEvent(event);
+
+  if (classification === "scaffold") return 0.25;
+  if (classification === "maintenance") return 0.5;
+
+  return 1;
 }
 
 function inferModuleName(filePath: string): string | null {
@@ -35,9 +45,12 @@ export function extractAuthorshipRelations(events: NormalizedEvent[]): Relation[
         : undefined;
 
     const personId = normalizePersonId(event.actor, email);
+    const classification = classifyEvent(event);
+    const weight = eventWeight(event);
 
     for (const file of event.relatedFiles ?? []) {
-      if (shouldIgnoreFile(file)) continue;
+      if (shouldIgnoreForModuleInference(file)) continue;
+
       const moduleName = inferModuleName(file);
       if (!moduleName) continue;
 
@@ -55,7 +68,8 @@ export function extractAuthorshipRelations(events: NormalizedEvent[]): Relation[
           evidenceIds: event.evidenceIds ?? [],
           metadata: {
             source: "local_git",
-            changeCount: 1,
+            changeCount: weight,
+            eventClassifications: [classification],
             exampleFiles: [file],
           },
           createdAt: now,
@@ -70,7 +84,14 @@ export function extractAuthorshipRelations(events: NormalizedEvent[]): Relation[
 
         existing.metadata = {
           ...existing.metadata,
-          changeCount: ((existing.metadata?.changeCount as number) ?? 1) + 1,
+          changeCount:
+            ((existing.metadata?.changeCount as number) ?? 0) + weight,
+          eventClassifications: Array.from(
+            new Set([
+              ...((existing.metadata?.eventClassifications as string[]) ?? []),
+              classification,
+            ])
+          ),
           exampleFiles: Array.from(
             new Set([
               ...((existing.metadata?.exampleFiles as string[]) ?? []),
