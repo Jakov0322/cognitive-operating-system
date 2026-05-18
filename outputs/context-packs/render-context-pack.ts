@@ -123,6 +123,7 @@ function renderContextPack(params: {
   lines.push("- `outputs/skills/codebase-navigation/SKILL.md`");
   lines.push("- `outputs/skills/risk-hotspots/SKILL.md`");
   lines.push("- `outputs/skills/project-timeline/SKILL.md`");
+  lines.push("- `outputs/reports/architectural-invariants.md`");
   lines.push("");
 
   lines.push("## Module Summary");

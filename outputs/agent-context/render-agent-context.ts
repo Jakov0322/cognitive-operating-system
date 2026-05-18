@@ -47,6 +47,7 @@ Before making changes, inspect the relevant generated skills:
 - \`outputs/reports/module-activity.md\`
 - \`outputs/reports/hotspots.md\`
 - \`outputs/reports/timeline.md\`
+- \`outputs/reports/architectural-invariants.md\`
 
 ## Context Packs
 - \`outputs/context-packs/core.md\`

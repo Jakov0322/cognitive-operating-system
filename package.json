@@ -23,7 +23,10 @@
     "context:core": "tsx outputs/context-packs/render-context-pack.ts core",
     "context:knowledge": "tsx outputs/context-packs/render-context-pack.ts knowledge",
     "context:outputs": "tsx outputs/context-packs/render-context-pack.ts outputs",
-    "context:task": "tsx outputs/context-packs/render-task-context-pack.ts"
+    "context:task": "tsx outputs/context-packs/render-task-context-pack.ts",
+    "rank:context": "tsx core/context/rank-context.ts",
+    "context:compress": "tsx core/context/compress-context.ts",
+    "infer:architectural-invariants": "tsx core/inference/infer-architectural-invariants.ts"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",

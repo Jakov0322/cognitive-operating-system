@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { ArchitecturalInvariant } from "../../knowledge/schemas/architectural-invariant";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -29,7 +30,7 @@ async function latestJsonFile(dir: string): Promise<string> {
   return join(dir, latest);
 }
 
-function renderSkill(modules: ModuleActivityProjection[]): string {
+function renderSkill(modules: ModuleActivityProjection[],invariants: ArchitecturalInvariant[]): string {
   const sorted = [...modules].sort((a, b) => b.changeCount - a.changeCount);
 
   const lines: string[] = [];
@@ -61,6 +62,17 @@ function renderSkill(modules: ModuleActivityProjection[]): string {
   lines.push("- Do not make outputs parse raw external APIs directly.");
   lines.push("- Prefer adding projections before adding narrative reports.");
   lines.push("- Preserve evidence-backed reasoning: every inference should trace back to events, relations, or projections.");
+  lines.push("");
+
+  lines.push("## Inferred Architectural Invariants");
+  lines.push("");
+
+  for (const invariant of invariants) {
+    lines.push(
+      `- ${invariant.description} Confidence: ${invariant.confidence.level} (${invariant.confidence.score}).`
+    );
+  }
+
   lines.push("");
 
   lines.push("## Active Modules");
@@ -112,7 +124,15 @@ async function main() {
 
   const outputPath = join(outputDir, "SKILL.md");
 
-  await writeFile(outputPath, renderSkill(modules), "utf8");
+  const invariantsFile = await latestJsonFile(
+    join(root, "knowledge", "projections", "architectural-invariants")
+  );
+
+  const invariants = JSON.parse(
+    await readFile(invariantsFile, "utf8")
+  ) as ArchitecturalInvariant[];
+
+  await writeFile(outputPath, renderSkill(modules, invariants), "utf8");
 
   console.log(`Saved skill to: ${outputPath}`);
 }
