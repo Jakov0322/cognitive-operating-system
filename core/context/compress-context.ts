@@ -41,6 +41,12 @@ function renderCompressedContext(
       );
     }
 
+    if (artifact.matchedSemanticConcepts.length > 0) {
+      lines.push(
+        `- Matched concepts: ${artifact.matchedSemanticConcepts.join(", ")}`
+      );
+    }
+
     lines.push(`- Why useful: ${artifact.description}`);
     lines.push("");
   }

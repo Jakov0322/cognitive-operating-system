@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { semanticRetrieval } from "../../core/context/semantic-retrieval";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -280,6 +281,15 @@ async function main() {
 
   const relevantModules = detectRelevantModules(task);
 
+  const semantic = semanticRetrieval(task);
+
+  const mergedRelevantModules = Array.from(
+    new Set([
+      ...relevantModules,
+      ...semantic.modules.map((module) => `module.${module}`),
+    ])
+  );
+
   const outputDir = join(root, "outputs", "context-packs");
   await mkdir(outputDir, { recursive: true });
 
@@ -292,7 +302,7 @@ async function main() {
       modules,
       hotspots,
       timeline,
-      relevantModules,
+      relevantModules: mergedRelevantModules,
     }),
     "utf8"
   );

@@ -56,6 +56,8 @@ async function main() {
   );
 
   await run("npm", ["run", "infer:hotspots", "--", moduleActivityFile]);
+  await run("npm", ["run", "infer:architectural-invariants"]);
+  await run("npm", ["run", "infer:expertise"]);
 
   const hotspotsFile = await latestJsonFile(
     join(root, "knowledge", "projections", "hotspots")
@@ -68,17 +70,31 @@ async function main() {
   await run("npm", ["run", "render:module-activity", "--", moduleActivityFile]);
   await run("npm", ["run", "render:hotspots", "--", hotspotsFile]);
   await run("npm", ["run", "render:timeline", "--", timelineFile]);
+  await run("npm", ["run", "render:architectural-invariants"]);
+  await run("npm", ["run", "render:expertise"]);
+
   await run("npm", ["run", "render:agent-context"]);
+  await run("npm", ["run", "render:agent-workflow"]);
+
   await run("npm", ["run", "render:skill:risk-hotspots"]);
   await run("npm", ["run", "render:skill:architecture"]);
   await run("npm", ["run", "render:skill:codebase-navigation"]);
   await run("npm", ["run", "render:skill:project-timeline"]);
   await run("npm", ["run", "render:skill:onboarding"]);
   await run("npm", ["run", "render:skill:index"]);
+
   await run("npm", ["run", "context:core"]);
   await run("npm", ["run", "context:connectors"]);
   await run("npm", ["run", "context:knowledge"]);
   await run("npm", ["run", "context:outputs"]);
+
+  await run("npm", ["run", "snapshot:repository"]);
+
+  try {
+    await run("npm", ["run", "compare:snapshots"]);
+  } catch {
+    console.log("Skipping snapshot comparison.");
+  }
 
   console.log("\nAnalysis completed.");
 }

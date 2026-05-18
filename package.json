@@ -1,32 +1,49 @@
 {
   "scripts": {
     "scan:git": "tsx connectors/local/git/scan-git.ts",
+
+    "github:fetch": "tsx connectors/github/fetch-github.ts",
+
     "extract:entities": "tsx core/entity-extraction/run-entity-extraction.ts",
     "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts",
+
     "project:module-activity": "tsx core/timeline-engine/build-module-activity.ts",
-    "render:module-activity": "tsx outputs/reports/render-module-activity.ts",
-    "analyze": "tsx core/orchestration/run-analysis.ts",
-    "infer:hotspots": "tsx core/inference/infer-hotspots.ts",
-    "render:hotspots": "tsx outputs/reports/render-hotspots.ts",
-    "github:fetch": "tsx connectors/github/fetch-github.ts",
     "project:timeline": "tsx core/timeline-engine/build-activity-timeline.ts",
+
+    "infer:hotspots": "tsx core/inference/infer-hotspots.ts",
+    "infer:architectural-invariants": "tsx core/inference/infer-architectural-invariants.ts",
+    "infer:expertise": "tsx core/inference/infer-expertise.ts",
+
+    "render:module-activity": "tsx outputs/reports/render-module-activity.ts",
+    "render:hotspots": "tsx outputs/reports/render-hotspots.ts",
     "render:timeline": "tsx outputs/reports/render-timeline.ts",
+    "render:architectural-invariants": "tsx outputs/reports/render-architectural-invariants.ts",
+    "render:expertise": "tsx outputs/reports/render-expertise.ts",
+
     "render:agent-context": "tsx outputs/agent-context/render-agent-context.ts",
+    "render:agent-workflow": "tsx outputs/agent-context/render-agent-workflow.ts",
+
     "render:skill:risk-hotspots": "tsx outputs/skills/render-risk-hotspots-skill.ts",
     "render:skill:architecture": "tsx outputs/skills/render-architecture-skill.ts",
     "render:skill:codebase-navigation": "tsx outputs/skills/render-codebase-navigation-skill.ts",
     "render:skill:project-timeline": "tsx outputs/skills/render-project-timeline-skill.ts",
     "render:skill:onboarding": "tsx outputs/skills/render-onboarding-skill.ts",
     "render:skill:index": "tsx outputs/skills/render-skill-index.ts",
+
     "context:pack": "tsx outputs/context-packs/render-context-pack.ts",
     "context:connectors": "tsx outputs/context-packs/render-context-pack.ts connectors",
     "context:core": "tsx outputs/context-packs/render-context-pack.ts core",
     "context:knowledge": "tsx outputs/context-packs/render-context-pack.ts knowledge",
     "context:outputs": "tsx outputs/context-packs/render-context-pack.ts outputs",
     "context:task": "tsx outputs/context-packs/render-task-context-pack.ts",
-    "rank:context": "tsx core/context/rank-context.ts",
     "context:compress": "tsx core/context/compress-context.ts",
-    "infer:architectural-invariants": "tsx core/inference/infer-architectural-invariants.ts"
+    "context:prepare": "tsx core/context/prepare-task-context.ts",
+    "rank:context": "tsx core/context/rank-context.ts",
+
+    "snapshot:repository": "tsx core/memory/build-repository-snapshot.ts",
+    "compare:snapshots": "tsx core/memory/compare-snapshots.ts",
+
+    "analyze": "tsx core/orchestration/run-analysis.ts"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",
