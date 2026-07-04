@@ -5,7 +5,7 @@ import { CONTEXT_ARTIFACTS } from "./artifact-registry";
 
 function renderCompressedContext(
   task: string,
-  ranked: ReturnType<typeof rankArtifacts>
+  ranked: Awaited<ReturnType<typeof rankArtifacts>>
 ): string {
   const top = ranked.slice(0, 5);
 
@@ -41,12 +41,7 @@ function renderCompressedContext(
       );
     }
 
-    if (artifact.matchedSemanticConcepts.length > 0) {
-      lines.push(
-        `- Matched concepts: ${artifact.matchedSemanticConcepts.join(", ")}`
-      );
-    }
-
+    lines.push(`- Semantic score: ${artifact.semanticScore}`);
     lines.push(`- Why useful: ${artifact.description}`);
     lines.push("");
   }
@@ -80,7 +75,7 @@ async function main() {
     );
   }
 
-  const ranked = rankArtifacts(task, CONTEXT_ARTIFACTS);
+  const ranked = await rankArtifacts(task, CONTEXT_ARTIFACTS);
 
   const outputDir = join(root, "outputs", "context-packs");
   await mkdir(outputDir, { recursive: true });

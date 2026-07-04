@@ -5,7 +5,7 @@ export type RankedContextArtifact = ContextArtifact & {
   relevanceScore: number;
   matchedKeywords: string[];
   matchedModules: string[];
-  matchedSemanticConcepts: string[];
+  semanticScore: number;
 };
 
 function normalize(text: string): string {
@@ -52,6 +52,8 @@ function detectModules(task: string): string[] {
       "normalization",
       "relevance",
       "ranking",
+      "embedding",
+      "embeddings",
     ],
     knowledge: [
       "knowledge",
@@ -93,65 +95,47 @@ function detectModules(task: string): string[] {
   return Array.from(matches);
 }
 
-export function rankArtifacts(
+function round(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+export async function rankArtifacts(
   task: string,
   artifacts: ContextArtifact[]
-): RankedContextArtifact[] {
+): Promise<RankedContextArtifact[]> {
   const taskTokens = new Set(tokenize(task));
   const taskModules = new Set(detectModules(task));
 
-  const semantic = semanticRetrieval(task);
-  const semanticModules = new Set(semantic.modules);
-  const semanticArtifactKeywords = new Set(
-    semantic.artifactKeywords.map((keyword) => keyword.toLowerCase())
+  const semantic = await semanticRetrieval(task);
+  const semanticScoreByPath = new Map(
+    semantic.matches.map((match) => [match.path, match.score])
   );
+  const semanticModules = new Set(semantic.modules);
 
   return artifacts
     .map((artifact) => {
-      const matchedKeywords = artifact.keywords.filter((keyword) => {
-        const normalizedKeyword = keyword.toLowerCase();
-
-        return (
-          taskTokens.has(normalizedKeyword) ||
-          semanticArtifactKeywords.has(normalizedKeyword)
-        );
-      });
+      const matchedKeywords = artifact.keywords.filter((keyword) =>
+        taskTokens.has(keyword.toLowerCase())
+      );
 
       const matchedModules = artifact.modules.filter(
         (module) => taskModules.has(module) || semanticModules.has(module)
       );
 
-      const matchedSemanticConcepts = semantic.concepts.filter((concept) =>
-        artifact.keywords.some((keyword) =>
-          keyword.toLowerCase().includes(concept.toLowerCase())
-        )
-      );
+      const semanticScore = semanticScoreByPath.get(artifact.path) ?? 0;
 
-      let score = 0;
-
-      score += matchedKeywords.length * 0.12;
-      score += matchedModules.length * 0.28;
-      score += matchedSemanticConcepts.length * 0.2;
-
-      if (artifact.type === "agent-context") score += 0.12;
-      if (artifact.type === "context-pack" && matchedModules.length > 0) {
-        score += 0.25;
-      }
-      if (artifact.type === "skill" && matchedKeywords.length > 0) {
-        score += 0.18;
-      }
-      if (artifact.type === "report" && matchedKeywords.length > 0) {
-        score += 0.08;
-      }
+      let score = semanticScore * 0.75;
+      score += Math.min(matchedKeywords.length * 0.05, 0.15);
+      score += Math.min(matchedModules.length * 0.08, 0.16);
 
       return {
         ...artifact,
-        relevanceScore: Math.min(1, Math.round(score * 100) / 100),
+        relevanceScore: Math.min(1, round(score)),
         matchedKeywords,
         matchedModules,
-        matchedSemanticConcepts,
+        semanticScore: round(semanticScore),
       };
     })
-    .filter((artifact) => artifact.relevanceScore > 0)
+    .filter((artifact) => artifact.relevanceScore > 0.15)
     .sort((a, b) => b.relevanceScore - a.relevanceScore);
 }

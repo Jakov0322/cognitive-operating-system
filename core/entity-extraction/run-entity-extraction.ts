@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { extractAuthors } from "./extract-authors";
 import { extractModules } from "./extract-modules";
+import { extractIssues } from "./extract-issues";
+import { extractPullRequests } from "./extract-pull-requests";
 import { Entity } from "../../knowledge/schemas/entity";
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 
@@ -38,18 +40,24 @@ async function main() {
   const entitiesDir = join(repositoryPath, "knowledge", "graph", "entities");
   await mkdir(entitiesDir, { recursive: true });
 
-  const latestFile = process.argv[2];
+  const files = process.argv.slice(2);
 
-  if (!latestFile) {
-    throw new Error("Provide normalized event file path as argument");
+  if (files.length === 0) {
+    throw new Error("Provide at least one normalized event file path as argument");
   }
 
-  const raw = await readFile(latestFile, "utf8");
-  const events = JSON.parse(raw) as NormalizedEvent[];
+  const events: NormalizedEvent[] = [];
+
+  for (const file of files) {
+    const raw = await readFile(file, "utf8");
+    events.push(...(JSON.parse(raw) as NormalizedEvent[]));
+  }
 
   const entities = mergeEntities([
     ...extractModules(events),
     ...extractAuthors(events),
+    ...extractIssues(events),
+    ...extractPullRequests(events),
   ]);
 
   const outputPath = join(entitiesDir, `entities-${Date.now()}.json`);

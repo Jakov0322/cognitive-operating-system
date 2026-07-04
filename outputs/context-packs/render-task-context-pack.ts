@@ -281,7 +281,7 @@ async function main() {
 
   const relevantModules = detectRelevantModules(task);
 
-  const semantic = semanticRetrieval(task);
+  const semantic = await semanticRetrieval(task);
 
   const mergedRelevantModules = Array.from(
     new Set([

@@ -3,6 +3,7 @@
     "scan:git": "tsx connectors/local/git/scan-git.ts",
 
     "github:fetch": "tsx connectors/github/fetch-github.ts",
+    "github:normalize": "tsx connectors/github/normalize-github-events.ts",
 
     "extract:entities": "tsx core/entity-extraction/run-entity-extraction.ts",
     "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts",
@@ -48,6 +49,8 @@
 
     "snapshot:repository": "tsx core/memory/build-repository-snapshot.ts",
     "compare:snapshots": "tsx core/memory/compare-snapshots.ts",
+
+    "build:embeddings": "tsx core/embeddings/build-embeddings.ts",
 
     "analyze": "tsx core/orchestration/run-analysis.ts"
   },

@@ -1,45 +1,93 @@
-import { SEMANTIC_CONCEPTS } from "./semantic-taxonomy";
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
-export type SemanticRetrievalResult = {
-  concepts: string[];
-  modules: string[];
-  artifactKeywords: string[];
+import { CONTEXT_ARTIFACTS } from "./artifact-registry";
+import { embedText } from "../embeddings/embedding-client";
+import { cosineSimilarity } from "../embeddings/vector-math";
+import { EmbeddingRecord } from "../../knowledge/schemas/embedding";
+
+export type SemanticMatch = {
+  path: string;
+  score: number;
 };
 
-export function semanticRetrieval(
-  task: string
-): SemanticRetrievalResult {
-  const normalized = task.toLowerCase();
+export type SemanticRetrievalResult = {
+  modules: string[];
+  matches: SemanticMatch[];
+};
 
-  const concepts = new Set<string>();
-  const modules = new Set<string>();
-  const artifactKeywords = new Set<string>();
+const TOP_K = 6;
+const EMPTY_RESULT: SemanticRetrievalResult = { modules: [], matches: [] };
 
-  for (const concept of SEMANTIC_CONCEPTS) {
-    const matched = concept.keywords.some((keyword) =>
-      normalized.includes(keyword.toLowerCase())
-    );
+async function latestEmbeddingsFile(
+  repositoryPath: string
+): Promise<string | null> {
+  const dir = join(repositoryPath, "knowledge", "embeddings");
 
-    if (!matched) continue;
+  let files: string[];
 
-    concepts.add(concept.id);
-
-    for (const related of concept.relatedConcepts) {
-      concepts.add(related);
-    }
-
-    for (const module of concept.modules) {
-      modules.add(module);
-    }
-
-    for (const keyword of concept.artifactKeywords) {
-      artifactKeywords.add(keyword);
-    }
+  try {
+    files = await readdir(dir);
+  } catch {
+    return null;
   }
 
-  return {
-    concepts: Array.from(concepts),
-    modules: Array.from(modules),
-    artifactKeywords: Array.from(artifactKeywords),
-  };
+  const matched = files
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .reverse();
+
+  return matched.length > 0 ? join(dir, matched[0]) : null;
+}
+
+export async function semanticRetrieval(
+  task: string
+): Promise<SemanticRetrievalResult> {
+  const repositoryPath = process.cwd();
+  const embeddingsFile = await latestEmbeddingsFile(repositoryPath);
+
+  if (!embeddingsFile) {
+    return EMPTY_RESULT;
+  }
+
+  const raw = await readFile(embeddingsFile, "utf8");
+  const records = JSON.parse(raw) as EmbeddingRecord[];
+
+  const artifactRecords = records.filter(
+    (record) => record.sourceType === "artifact" && record.path
+  );
+
+  if (artifactRecords.length === 0) {
+    return EMPTY_RESULT;
+  }
+
+  let taskVector: number[];
+
+  try {
+    taskVector = await embedText(task);
+  } catch {
+    return EMPTY_RESULT;
+  }
+
+  const scored = artifactRecords
+    .map((record) => ({
+      path: record.path as string,
+      score: cosineSimilarity(taskVector, record.vector),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, TOP_K);
+
+  const modules = Array.from(
+    new Set(
+      scored.flatMap((match) => {
+        const artifact = CONTEXT_ARTIFACTS.find(
+          (item) => item.path === match.path
+        );
+
+        return artifact?.modules ?? [];
+      })
+    )
+  );
+
+  return { modules, matches: scored };
 }

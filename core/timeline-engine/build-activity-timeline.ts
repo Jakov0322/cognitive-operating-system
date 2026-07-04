@@ -88,14 +88,18 @@ function buildActivityTimeline(events: NormalizedEvent[]): TimelineDay[] {
 
 async function main() {
   const repositoryPath = process.cwd();
-  const normalizedEventsFile = process.argv[2];
+  const files = process.argv.slice(2);
 
-  if (!normalizedEventsFile) {
-    throw new Error("Provide normalized events file path as argument");
+  if (files.length === 0) {
+    throw new Error("Provide at least one normalized events file path as argument");
   }
 
-  const raw = await readFile(normalizedEventsFile, "utf8");
-  const events = JSON.parse(raw) as NormalizedEvent[];
+  const events: NormalizedEvent[] = [];
+
+  for (const file of files) {
+    const raw = await readFile(file, "utf8");
+    events.push(...(JSON.parse(raw) as NormalizedEvent[]));
+  }
 
   const timeline = buildActivityTimeline(events);
 

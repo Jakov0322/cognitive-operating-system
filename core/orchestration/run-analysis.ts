@@ -32,18 +32,34 @@ async function latestJsonFile(dir: string): Promise<string> {
   return join(dir, jsonFiles[0]);
 }
 
+async function allJsonFiles(dir: string): Promise<string[]> {
+  const files = await readdir(dir);
+
+  return files
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .map((file) => join(dir, file));
+}
+
 async function main() {
   const root = process.cwd();
 
   await run("npm", ["run", "scan:git"]);
 
-  const normalizedFile = await latestJsonFile(
+  try {
+    await run("npm", ["run", "github:fetch"]);
+    await run("npm", ["run", "github:normalize"]);
+  } catch {
+    console.log("Skipping GitHub ingestion (no GITHUB_TOKEN or fetch failed).");
+  }
+
+  const normalizedFiles = await allJsonFiles(
     join(root, "knowledge", "events", "normalized")
   );
 
-  await run("npm", ["run", "extract:entities", "--", normalizedFile]);
-  await run("npm", ["run", "extract:relations", "--", normalizedFile]);
-  await run("npm", ["run", "project:timeline", "--", normalizedFile]);
+  await run("npm", ["run", "extract:entities", "--", ...normalizedFiles]);
+  await run("npm", ["run", "extract:relations", "--", ...normalizedFiles]);
+  await run("npm", ["run", "project:timeline", "--", ...normalizedFiles]);
 
   const relationsFile = await latestJsonFile(
     join(root, "knowledge", "graph", "relations")
@@ -91,6 +107,12 @@ async function main() {
   await run("npm", ["run", "context:connectors"]);
   await run("npm", ["run", "context:knowledge"]);
   await run("npm", ["run", "context:outputs"]);
+
+  try {
+    await run("npm", ["run", "build:embeddings"]);
+  } catch {
+    console.log("Skipping embedding build (no VOYAGE_API_KEY or embedding request failed).");
+  }
 
   await run("npm", ["run", "snapshot:repository"]);
 

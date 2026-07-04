@@ -3,7 +3,10 @@ import { join } from "node:path";
 import { CONTEXT_ARTIFACTS } from "./artifact-registry";
 import { rankArtifacts } from "./relevance-engine";
 
-function renderMarkdown(task: string, ranked: ReturnType<typeof rankArtifacts>): string {
+function renderMarkdown(
+  task: string,
+  ranked: Awaited<ReturnType<typeof rankArtifacts>>
+): string {
   const lines: string[] = [];
 
   lines.push("# Ranked Context");
@@ -59,7 +62,7 @@ async function main() {
     throw new Error('Provide task. Example: npm run rank:context -- "refactor github connector"');
   }
 
-  const ranked = rankArtifacts(task, CONTEXT_ARTIFACTS);
+  const ranked = await rankArtifacts(task, CONTEXT_ARTIFACTS);
 
   const outputDir = join(root, "outputs", "context-packs");
   await mkdir(outputDir, { recursive: true });

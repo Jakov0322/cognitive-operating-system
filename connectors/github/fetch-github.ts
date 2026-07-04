@@ -29,11 +29,16 @@ async function main() {
 
   const comments: unknown[] = [];
 
-  for (const issue of issues as any[]) {
+  for (const issue of issues) {
     if (!issue.number) continue;
 
+    const parentType = issue.pull_request ? "pull_request" : "issue";
+
     try {
-      const issueComments = await client.listIssueComments(issue.number);
+      const issueComments = await client.listIssueComments(
+        issue.number,
+        parentType
+      );
 
       comments.push(...issueComments);
     } catch (error) {
