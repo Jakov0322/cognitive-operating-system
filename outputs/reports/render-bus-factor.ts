@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type BusFactorRisk = {
   moduleId: string;
   busFactor: number;
@@ -65,15 +67,13 @@ function renderMarkdown(risks: BusFactorRisk[]): string {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const busFactorFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "bus-factor")
+    knowledgeDir("projections", "bus-factor")
   );
 
   const risks = JSON.parse(await readFile(busFactorFile, "utf8")) as BusFactorRisk[];
 
-  const outputDir = join(root, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "bus-factor.md");

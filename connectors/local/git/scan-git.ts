@@ -4,9 +4,10 @@ import { join } from "node:path";
 import { GitService } from "./git.service";
 import { parseGitLog } from "./log-reader";
 import { normalizeCommitsToEvents } from "./commit-normalizer";
+import { getRepoRoot, knowledgeDir } from "../../../core/shared/workspace";
 
 async function main() {
-  const repositoryPath = process.argv[2] ?? process.cwd();
+  const repositoryPath = process.argv[2] ?? getRepoRoot();
 
   const git = new GitService(repositoryPath);
 
@@ -16,7 +17,7 @@ async function main() {
   const rawCommits = parseGitLog(rawLog);
   const normalizedEvents = normalizeCommitsToEvents(rawCommits, repository);
 
-  const rootOutputDir = join(repositoryPath, "knowledge", "events");
+  const rootOutputDir = knowledgeDir("events");
   const rawOutputDir = join(rootOutputDir, "raw");
   const normalizedOutputDir = join(rootOutputDir, "normalized");
 

@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { ArchitecturalDriftSignal } from "../../knowledge/schemas/architectural-drift";
+import { knowledgeDir } from "../shared/workspace";
 
 type SnapshotDiff = {
   changes: {
@@ -42,14 +43,12 @@ function severity(score: number): "low" | "medium" | "high" {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const diffFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "snapshot-diffs")
+    knowledgeDir("projections", "snapshot-diffs")
   );
 
   const moduleActivityFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "module-activity")
+    knowledgeDir("projections", "module-activity")
   );
 
   const diff = JSON.parse(
@@ -168,12 +167,7 @@ async function main() {
     }
   }
 
-  const outputDir = join(
-    root,
-    "knowledge",
-    "projections",
-    "architectural-drift"
-  );
+  const outputDir = knowledgeDir("projections", "architectural-drift");
 
   await mkdir(outputDir, { recursive: true });
 

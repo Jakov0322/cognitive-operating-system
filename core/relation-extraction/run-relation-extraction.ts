@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
+import { knowledgeDir } from "../shared/workspace";
 import { Relation } from "../../knowledge/schemas/relation";
 import { extractAuthorshipRelations } from "./extract-authorship-relations";
 import { extractModuleChangeRelations } from "./extract-module-change-relations";
@@ -31,9 +32,7 @@ function mergeRelations(relations: Relation[]): Relation[] {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-
-  const relationsDir = join(repositoryPath, "knowledge", "graph", "relations");
+  const relationsDir = knowledgeDir("graph", "relations");
   await mkdir(relationsDir, { recursive: true });
 
   const files = process.argv.slice(2);

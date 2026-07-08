@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { semanticRetrieval } from "../../core/context/semantic-retrieval";
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -258,7 +259,6 @@ function renderTaskContextPack(params: {
 }
 
 async function main() {
-  const root = process.cwd();
   const task = process.argv.slice(2).join(" ").trim();
 
   if (!task) {
@@ -268,15 +268,15 @@ async function main() {
   }
 
   const modules = await readLatestJson<ModuleActivityProjection[]>(
-    join(root, "knowledge", "projections", "module-activity")
+    knowledgeDir("projections", "module-activity")
   );
 
   const hotspots = await readLatestJson<ModuleHotspot[]>(
-    join(root, "knowledge", "projections", "hotspots")
+    knowledgeDir("projections", "hotspots")
   );
 
   const timeline = await readLatestJson<TimelineDay[]>(
-    join(root, "knowledge", "projections", "timeline")
+    knowledgeDir("projections", "timeline")
   );
 
   const relevantModules = detectRelevantModules(task);
@@ -290,7 +290,7 @@ async function main() {
     ])
   );
 
-  const outputDir = join(root, "outputs", "context-packs");
+  const outputDir = outputsDir("context-packs");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "task-context.md");

@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { LinearClient } from "./linear-client";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function main() {
   const apiKey = process.env.LINEAR_API_KEY;
@@ -18,13 +19,7 @@ async function main() {
 
   const { issues, comments } = await client.listIssuesAndComments();
 
-  const outputDir = join(
-    process.cwd(),
-    "knowledge",
-    "events",
-    "raw",
-    "linear"
-  );
+  const outputDir = knowledgeDir("events", "raw", "linear");
 
   await mkdir(outputDir, { recursive: true });
 

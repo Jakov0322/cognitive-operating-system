@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { rankArtifacts } from "./relevance-engine";
 import { CONTEXT_ARTIFACTS } from "./artifact-registry";
+import { outputsDir } from "../shared/workspace";
 
 function renderCompressedContext(
   task: string,
@@ -66,7 +67,6 @@ function renderCompressedContext(
 }
 
 async function main() {
-  const root = process.cwd();
   const task = process.argv.slice(2).join(" ").trim();
 
   if (!task) {
@@ -77,7 +77,7 @@ async function main() {
 
   const ranked = await rankArtifacts(task, CONTEXT_ARTIFACTS);
 
-  const outputDir = join(root, "outputs", "context-packs");
+  const outputDir = outputsDir("context-packs");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "compressed-context.md");

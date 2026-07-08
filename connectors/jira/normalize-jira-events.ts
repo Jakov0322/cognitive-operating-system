@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { RawJiraComment, RawJiraIssue } from "./jira-types";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function latestFileWithPrefix(
   dir: string,
@@ -79,8 +80,7 @@ function normalizeComment(comment: RawJiraComment): NormalizedEvent {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-  const rawDir = join(repositoryPath, "knowledge", "events", "raw", "jira");
+  const rawDir = knowledgeDir("events", "raw", "jira");
 
   const [issuesFile, commentsFile] = await Promise.all([
     latestFileWithPrefix(rawDir, "issues-"),
@@ -105,7 +105,7 @@ async function main() {
     );
   }
 
-  const outputDir = join(repositoryPath, "knowledge", "events", "normalized");
+  const outputDir = knowledgeDir("events", "normalized");
   await mkdir(outputDir, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { GitHubClient } from "./github-client";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function main() {
   const owner = process.env.GITHUB_OWNER;
@@ -48,13 +49,7 @@ async function main() {
     }
   }
 
-  const outputDir = join(
-    process.cwd(),
-    "knowledge",
-    "events",
-    "raw",
-    "github"
-  );
+  const outputDir = knowledgeDir("events", "raw", "github");
 
   await mkdir(outputDir, { recursive: true });
 

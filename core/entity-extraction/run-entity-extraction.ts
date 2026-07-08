@@ -8,6 +8,7 @@ import { extractPullRequests } from "./extract-pull-requests";
 import { extractCIJobs } from "./extract-ci-jobs";
 import { Entity } from "../../knowledge/schemas/entity";
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
+import { knowledgeDir } from "../shared/workspace";
 
 function mergeEntities(entities: Entity[]): Entity[] {
   const map = new Map<string, Entity>();
@@ -36,9 +37,7 @@ function mergeEntities(entities: Entity[]): Entity[] {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-
-  const entitiesDir = join(repositoryPath, "knowledge", "graph", "entities");
+  const entitiesDir = knowledgeDir("graph", "entities");
   await mkdir(entitiesDir, { recursive: true });
 
   const files = process.argv.slice(2);

@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { SlackClient } from "./slack-client";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function main() {
   const token = process.env.SLACK_BOT_TOKEN;
@@ -31,13 +32,7 @@ async function main() {
   const users = await client.listUsers();
   const messages = await client.listMessages(users);
 
-  const outputDir = join(
-    process.cwd(),
-    "knowledge",
-    "events",
-    "raw",
-    "slack"
-  );
+  const outputDir = knowledgeDir("events", "raw", "slack");
 
   await mkdir(outputDir, { recursive: true });
 

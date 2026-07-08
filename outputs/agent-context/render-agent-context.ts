@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { outputsDir } from "../../core/shared/workspace";
+
 function renderAgentsMd(): string {
   return `# AGENTS.md
 
@@ -58,9 +60,7 @@ Before making changes, inspect the relevant generated skills:
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const outputDir = join(root, "outputs", "agent-context");
+  const outputDir = outputsDir("agent-context");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "AGENTS.md");

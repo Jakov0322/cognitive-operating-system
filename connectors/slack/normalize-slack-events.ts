@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { RawSlackMessage } from "./slack-types";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function latestFileWithPrefix(
   dir: string,
@@ -53,8 +54,7 @@ function normalizeMessage(message: RawSlackMessage): NormalizedEvent {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-  const rawDir = join(repositoryPath, "knowledge", "events", "raw", "slack");
+  const rawDir = knowledgeDir("events", "raw", "slack");
 
   const messagesFile = await latestFileWithPrefix(rawDir, "messages-");
 
@@ -71,7 +71,7 @@ async function main() {
     );
   }
 
-  const outputDir = join(repositoryPath, "knowledge", "events", "normalized");
+  const outputDir = knowledgeDir("events", "normalized");
   await mkdir(outputDir, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

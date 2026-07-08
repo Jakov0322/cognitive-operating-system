@@ -4,15 +4,14 @@ import { join } from "node:path";
 import { collectEmbeddableContent } from "./collect-embeddable-content";
 import { embedTexts } from "./embedding-client";
 import { EmbeddingRecord } from "../../knowledge/schemas/embedding";
+import { getDataRoot, knowledgeDir } from "../shared/workspace";
 
 function embeddingModel(): string {
   return process.env.VOYAGE_EMBEDDING_MODEL ?? "voyage-3-lite";
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-
-  const content = await collectEmbeddableContent(repositoryPath);
+  const content = await collectEmbeddableContent(getDataRoot());
 
   if (content.length === 0) {
     console.log("No embeddable content found.");
@@ -34,7 +33,7 @@ async function main() {
     createdAt: now,
   }));
 
-  const outputDir = join(repositoryPath, "knowledge", "embeddings");
+  const outputDir = knowledgeDir("embeddings");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `embeddings-${Date.now()}.json`);

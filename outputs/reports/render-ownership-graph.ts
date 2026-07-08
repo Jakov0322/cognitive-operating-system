@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type OwnershipGraph = {
   nodes: {
     id: string;
@@ -72,15 +74,13 @@ function renderMarkdown(graph: OwnershipGraph): string {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const graphFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "ownership-graph")
+    knowledgeDir("projections", "ownership-graph")
   );
 
   const graph = JSON.parse(await readFile(graphFile, "utf8")) as OwnershipGraph;
 
-  const outputDir = join(root, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "ownership-graph.md");

@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { outputsDir } from "../../core/shared/workspace";
+
 type TimelineDay = {
   date: string;
   changeCount: number;
@@ -67,7 +69,6 @@ function renderMarkdown(days: TimelineDay[]): string {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
   const timelineFile = process.argv[2];
 
   if (!timelineFile) {
@@ -77,7 +78,7 @@ async function main() {
   const raw = await readFile(timelineFile, "utf8");
   const days = JSON.parse(raw) as TimelineDay[];
 
-  const outputDir = join(repositoryPath, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "timeline.md");

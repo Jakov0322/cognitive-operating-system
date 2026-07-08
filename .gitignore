@@ -2,14 +2,4 @@ node_modules/
 dist/
 .env
 
-knowledge/events/
-knowledge/graph/
-knowledge/projections/
-knowledge/snapshots/
-knowledge/embeddings/*.json
-
-outputs/reports/*.md
-outputs/skills/*/SKILL.md
-outputs/skills/INDEX.md
-outputs/context-packs/*.md
-outputs/agent-context/*.md
+.cognitive-os/

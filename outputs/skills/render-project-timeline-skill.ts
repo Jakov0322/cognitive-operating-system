@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type TimelineDay = {
   date: string;
   changeCount: number;
@@ -95,15 +97,13 @@ function renderSkill(days: TimelineDay[]): string {
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const timelineDir = join(root, "knowledge", "projections", "timeline");
+  const timelineDir = knowledgeDir("projections", "timeline");
 
   const latest = await latestJsonFile(timelineDir);
   const raw = await readFile(latest, "utf8");
   const days = JSON.parse(raw) as TimelineDay[];
 
-  const outputDir = join(root, "outputs", "skills", "project-timeline");
+  const outputDir = outputsDir("skills", "project-timeline");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "SKILL.md");

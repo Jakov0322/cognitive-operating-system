@@ -1,6 +1,8 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { outputsDir } from "../../core/shared/workspace";
+
 function renderSkillIndex(): string {
   return `# Skill Index
 
@@ -90,9 +92,7 @@ Prefer the narrowest relevant skill over reading every file.
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const outputDir = join(root, "outputs", "skills");
+  const outputDir = outputsDir("skills");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "INDEX.md");

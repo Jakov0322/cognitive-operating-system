@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { ArchitecturalInvariant } from "../../knowledge/schemas/architectural-invariant";
 import { confidence } from "../shared/confidence";
+import { knowledgeDir } from "../shared/workspace";
 
 function inferArchitecturalInvariants(): ArchitecturalInvariant[] {
   const now = new Date().toISOString();
@@ -96,11 +97,9 @@ function inferArchitecturalInvariants(): ArchitecturalInvariant[] {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const invariants = inferArchitecturalInvariants();
 
-  const outputDir = join(root, "knowledge", "projections", "architectural-invariants");
+  const outputDir = knowledgeDir("projections", "architectural-invariants");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `architectural-invariants-${Date.now()}.json`);

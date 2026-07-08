@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { CIClient } from "./ci-client";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function main() {
   const owner = process.env.GITHUB_OWNER;
@@ -20,7 +21,7 @@ async function main() {
 
   const runs = await client.listWorkflowRuns();
 
-  const outputDir = join(process.cwd(), "knowledge", "events", "raw", "ci");
+  const outputDir = knowledgeDir("events", "raw", "ci");
   await mkdir(outputDir, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

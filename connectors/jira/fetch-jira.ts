@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { JiraClient } from "./jira-client";
 import { RawJiraComment } from "./jira-types";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function main() {
   const baseUrl = process.env.JIRA_BASE_URL;
@@ -36,7 +37,7 @@ async function main() {
     }
   }
 
-  const outputDir = join(process.cwd(), "knowledge", "events", "raw", "jira");
+  const outputDir = knowledgeDir("events", "raw", "jira");
   await mkdir(outputDir, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

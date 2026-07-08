@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type ModuleActivityProjection = {
   moduleId: string;
   changeCount: number;
@@ -138,14 +140,12 @@ function renderSkill(
 }
 
 async function main() {
-  const root = process.cwd();
-
   const moduleActivityFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "module-activity")
+    knowledgeDir("projections", "module-activity")
   );
 
   const hotspotsFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "hotspots")
+    knowledgeDir("projections", "hotspots")
   );
 
   const modules = JSON.parse(
@@ -156,7 +156,7 @@ async function main() {
     await readFile(hotspotsFile, "utf8")
   ) as ModuleHotspot[];
 
-  const outputDir = join(root, "outputs", "skills", "onboarding");
+  const outputDir = outputsDir("skills", "onboarding");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "SKILL.md");

@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type ExpertiseProfile = {
   personId: string;
   strongestModules: { moduleId: string; score: number }[];
@@ -112,20 +114,18 @@ function renderSkill(expertise: ExpertiseProfile[], busFactor: BusFactorRisk[]):
 }
 
 async function main() {
-  const root = process.cwd();
-
   const expertiseFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "expertise")
+    knowledgeDir("projections", "expertise")
   );
 
   const busFactorFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "bus-factor")
+    knowledgeDir("projections", "bus-factor")
   );
 
   const expertise = JSON.parse(await readFile(expertiseFile, "utf8")) as ExpertiseProfile[];
   const busFactor = JSON.parse(await readFile(busFactorFile, "utf8")) as BusFactorRisk[];
 
-  const outputDir = join(root, "outputs", "skills", "human-cognition");
+  const outputDir = outputsDir("skills", "human-cognition");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "SKILL.md");

@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { ConfidenceScore } from "../../knowledge/ontology/confidence";
 import { confidenceFromWeightedCount } from "../shared/confidence";
+import { knowledgeDir } from "../shared/workspace";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -93,7 +94,6 @@ function inferHotspots(
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
   const moduleActivityFile = process.argv[2];
 
   if (!moduleActivityFile) {
@@ -105,7 +105,7 @@ async function main() {
 
   const hotspots = inferHotspots(modules);
 
-  const outputDir = join(repositoryPath, "knowledge", "projections", "hotspots");
+  const outputDir = knowledgeDir("projections", "hotspots");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `hotspots-${Date.now()}.json`);

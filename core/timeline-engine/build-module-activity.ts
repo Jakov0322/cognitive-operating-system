@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import { Relation } from "../../knowledge/schemas/relation";
+import { knowledgeDir } from "../shared/workspace";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -85,7 +86,6 @@ function buildModuleActivity(relations: Relation[]): ModuleActivityProjection[] 
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
   const relationFile = process.argv[2];
 
   if (!relationFile) {
@@ -97,12 +97,7 @@ async function main() {
 
   const projection = buildModuleActivity(relations);
 
-  const outputDir = join(
-    repositoryPath,
-    "knowledge",
-    "projections",
-    "module-activity"
-  );
+  const outputDir = knowledgeDir("projections", "module-activity");
 
   await mkdir(outputDir, { recursive: true });
 

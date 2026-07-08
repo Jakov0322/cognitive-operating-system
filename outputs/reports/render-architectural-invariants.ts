@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type ArchitecturalInvariant = {
   id: string;
   type: string;
@@ -66,13 +68,12 @@ function renderMarkdown(items: ArchitecturalInvariant[]): string {
 }
 
 async function main() {
-  const root = process.cwd();
-  const invariantsDir = join(root, "knowledge", "projections", "architectural-invariants");
+  const invariantsDir = knowledgeDir("projections", "architectural-invariants");
   const latest = await latestJsonFile(invariantsDir);
   const raw = await readFile(latest, "utf8");
   const items = JSON.parse(raw) as ArchitecturalInvariant[];
 
-  const outputDir = join(root, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   await writeFile(

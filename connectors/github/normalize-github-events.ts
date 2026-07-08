@@ -9,6 +9,7 @@ import {
   RawGitHubIssue,
   RawGitHubPullRequest,
 } from "./github-types";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function latestFileWithPrefix(
   dir: string,
@@ -130,8 +131,7 @@ function normalizeComment(
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-  const rawDir = join(repositoryPath, "knowledge", "events", "raw", "github");
+  const rawDir = knowledgeDir("events", "raw", "github");
 
   const owner = process.env.GITHUB_OWNER;
   const repo = process.env.GITHUB_REPO;
@@ -184,7 +184,7 @@ async function main() {
     );
   }
 
-  const outputDir = join(repositoryPath, "knowledge", "events", "normalized");
+  const outputDir = knowledgeDir("events", "normalized");
   await mkdir(outputDir, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

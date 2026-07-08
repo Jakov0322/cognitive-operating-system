@@ -3,6 +3,8 @@ import { promisify } from "node:util";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir } from "../shared/workspace";
+
 const execFileAsync = promisify(execFile);
 
 async function run(command: string, args: string[]) {
@@ -42,8 +44,6 @@ async function allJsonFiles(dir: string): Promise<string[]> {
 }
 
 async function main() {
-  const root = process.cwd();
-
   await run("npm", ["run", "scan:git"]);
 
   try {
@@ -82,7 +82,7 @@ async function main() {
   }
 
   const normalizedFiles = await allJsonFiles(
-    join(root, "knowledge", "events", "normalized")
+    knowledgeDir("events", "normalized")
   );
 
   await run("npm", ["run", "extract:entities", "--", ...normalizedFiles]);
@@ -90,13 +90,13 @@ async function main() {
   await run("npm", ["run", "project:timeline", "--", ...normalizedFiles]);
 
   const relationsFile = await latestJsonFile(
-    join(root, "knowledge", "graph", "relations")
+    knowledgeDir("graph", "relations")
   );
 
   await run("npm", ["run", "project:module-activity", "--", relationsFile]);
 
   const moduleActivityFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "module-activity")
+    knowledgeDir("projections", "module-activity")
   );
 
   await run("npm", ["run", "infer:hotspots", "--", moduleActivityFile]);
@@ -106,11 +106,11 @@ async function main() {
   await run("npm", ["run", "infer:bus-factor"]);
 
   const hotspotsFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "hotspots")
+    knowledgeDir("projections", "hotspots")
   );
 
   const timelineFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "timeline")
+    knowledgeDir("projections", "timeline")
   );
 
   await run("npm", ["run", "render:module-activity", "--", moduleActivityFile]);

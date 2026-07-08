@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { NormalizedEvent, NormalizedEventType } from "../../knowledge/schemas/normalized-event";
 import { RawCIRun } from "./ci-types";
+import { knowledgeDir } from "../../core/shared/workspace";
 
 async function latestFileWithPrefix(
   dir: string,
@@ -63,8 +64,7 @@ function normalizeRun(run: RawCIRun, repository: string): NormalizedEvent {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
-  const rawDir = join(repositoryPath, "knowledge", "events", "raw", "ci");
+  const rawDir = knowledgeDir("events", "raw", "ci");
 
   const owner = process.env.GITHUB_OWNER;
   const repo = process.env.GITHUB_REPO;
@@ -88,7 +88,7 @@ async function main() {
     throw new Error("No raw CI data found. Run `npm run ci:fetch` first.");
   }
 
-  const outputDir = join(repositoryPath, "knowledge", "events", "normalized");
+  const outputDir = knowledgeDir("events", "normalized");
   await mkdir(outputDir, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

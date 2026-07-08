@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type ModuleHotspot = {
   moduleId: string;
   hotspotScore: number;
@@ -97,14 +99,7 @@ async function latestHotspotFile(dir: string): Promise<string> {
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const hotspotsDir = join(
-    root,
-    "knowledge",
-    "projections",
-    "hotspots"
-  );
+  const hotspotsDir = knowledgeDir("projections", "hotspots");
 
   const files = await (await import("node:fs/promises")).readdir(hotspotsDir);
 
@@ -121,7 +116,7 @@ async function main() {
 
   const hotspots = JSON.parse(raw) as ModuleHotspot[];
 
-  const outputDir = join(root, "outputs", "skills", "risk-hotspots");
+  const outputDir = outputsDir("skills", "risk-hotspots");
 
   await mkdir(outputDir, { recursive: true });
 

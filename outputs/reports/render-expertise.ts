@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type ExpertiseProfile = {
   personId: string;
   strongestModules: {
@@ -82,17 +84,15 @@ function renderMarkdown(profiles: ExpertiseProfile[]): string {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const expertiseFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "expertise")
+    knowledgeDir("projections", "expertise")
   );
 
   const profiles = JSON.parse(
     await readFile(expertiseFile, "utf8")
   ) as ExpertiseProfile[];
 
-  const outputDir = join(root, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "expertise.md");

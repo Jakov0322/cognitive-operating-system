@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { SnapshotDiff } from "../../knowledge/schemas/snapshot-diff";
+import { knowledgeDir } from "../shared/workspace";
 
 type RepositorySnapshot = {
   id: string;
@@ -57,9 +58,7 @@ function inferSignals(
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const snapshotDir = join(root, "knowledge", "snapshots");
+  const snapshotDir = knowledgeDir("snapshots");
 
   const [previousPath, currentPath] = await latestSnapshots(snapshotDir);
 
@@ -93,12 +92,7 @@ async function main() {
     signals: inferSignals(previous, current),
   };
 
-  const outputDir = join(
-    root,
-    "knowledge",
-    "projections",
-    "snapshot-diffs"
-  );
+  const outputDir = knowledgeDir("projections", "snapshot-diffs");
 
   await mkdir(outputDir, { recursive: true });
 

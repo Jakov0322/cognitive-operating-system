@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { confidence } from "../shared/confidence";
 import { ExpertiseProfile } from "../../knowledge/schemas/expertise-profile";
+import { knowledgeDir } from "../shared/workspace";
 
 type Relation = {
   type: string;
@@ -64,10 +65,8 @@ function expertiseAreas(modules: string[]): string[] {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const relationsFile = await latestJsonFile(
-    join(root, "knowledge", "graph", "relations")
+    knowledgeDir("graph", "relations")
   );
 
   const relations = JSON.parse(
@@ -149,12 +148,7 @@ async function main() {
     profiles.push(profile);
   }
 
-  const outputDir = join(
-    root,
-    "knowledge",
-    "projections",
-    "expertise"
-  );
+  const outputDir = knowledgeDir("projections", "expertise");
 
   await mkdir(outputDir, { recursive: true });
 

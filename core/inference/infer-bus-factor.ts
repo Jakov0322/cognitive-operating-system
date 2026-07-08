@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { BusFactorRisk } from "../../knowledge/schemas/bus-factor";
 import { confidenceFromWeightedCount } from "../shared/confidence";
+import { knowledgeDir } from "../shared/workspace";
 
 type OwnershipGraph = {
   edges: {
@@ -36,10 +37,8 @@ function riskLevel(busFactor: number): "low" | "medium" | "high" {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const graphFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "ownership-graph")
+    knowledgeDir("projections", "ownership-graph")
   );
 
   const graph = JSON.parse(await readFile(graphFile, "utf8")) as OwnershipGraph;
@@ -100,7 +99,7 @@ async function main() {
     });
   }
 
-  const outputDir = join(root, "knowledge", "projections", "bus-factor");
+  const outputDir = knowledgeDir("projections", "bus-factor");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `bus-factor-${Date.now()}.json`);

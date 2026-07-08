@@ -1,10 +1,12 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
+import { getRepoRoot } from "../../../core/shared/workspace";
+
 const execFileAsync = promisify(execFile);
 
 export class GitService {
-  constructor(private readonly repositoryPath: string = process.cwd()) {}
+  constructor(private readonly repositoryPath: string = getRepoRoot()) {}
 
   async log(): Promise<string> {
     const { stdout } = await execFileAsync(

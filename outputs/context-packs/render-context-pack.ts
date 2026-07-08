@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
+
 type ModuleActivityProjection = {
   moduleId: string;
   changeCount: number;
@@ -234,7 +236,6 @@ function renderContextPack(params: {
 }
 
 async function main() {
-  const root = process.cwd();
   const target = process.argv[2];
 
   if (!target) {
@@ -244,18 +245,18 @@ async function main() {
   }
 
   const modules = await readLatestJson<ModuleActivityProjection[]>(
-    join(root, "knowledge", "projections", "module-activity")
+    knowledgeDir("projections", "module-activity")
   );
 
   const hotspots = await readLatestJson<ModuleHotspot[]>(
-    join(root, "knowledge", "projections", "hotspots")
+    knowledgeDir("projections", "hotspots")
   );
 
   const timeline = await readLatestJson<TimelineDay[]>(
-    join(root, "knowledge", "projections", "timeline")
+    knowledgeDir("projections", "timeline")
   );
 
-  const outputDir = join(root, "outputs", "context-packs");
+  const outputDir = outputsDir("context-packs");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `${moduleName(moduleId(target))}.md`);

@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { RepositorySnapshot } from "../../knowledge/schemas/repository-snapshot";
+import { getRepoRoot, knowledgeDir } from "../shared/workspace";
 
 async function latestJsonFile(dir: string): Promise<string> {
   const files = await readdir(dir);
@@ -23,22 +24,20 @@ async function loadJson<T>(path: string): Promise<T> {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const moduleActivityFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "module-activity")
+    knowledgeDir("projections", "module-activity")
   );
 
   const hotspotsFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "hotspots")
+    knowledgeDir("projections", "hotspots")
   );
 
   const invariantsFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "architectural-invariants")
+    knowledgeDir("projections", "architectural-invariants")
   );
 
   const timelineFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "timeline")
+    knowledgeDir("projections", "timeline")
   );
 
   const modules = await loadJson<any[]>(moduleActivityFile);
@@ -54,7 +53,7 @@ async function main() {
     createdAt: now,
 
     metadata: {
-      repositoryName: root.split(/[\\/]/).pop() ?? "repository",
+      repositoryName: getRepoRoot().split(/[\\/]/).pop() ?? "repository",
       generatedAt: now,
     },
 
@@ -76,7 +75,7 @@ async function main() {
     },
   };
 
-  const outputDir = join(root, "knowledge", "snapshots");
+  const outputDir = knowledgeDir("snapshots");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(

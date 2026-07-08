@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { ArchitecturalInvariant } from "../../knowledge/schemas/architectural-invariant";
+import { knowledgeDir, outputsDir } from "../../core/shared/workspace";
 
 type ModuleActivityProjection = {
   moduleId: string;
@@ -106,26 +107,19 @@ function renderSkill(modules: ModuleActivityProjection[],invariants: Architectur
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const moduleActivityDir = join(
-    root,
-    "knowledge",
-    "projections",
-    "module-activity"
-  );
+  const moduleActivityDir = knowledgeDir("projections", "module-activity");
 
   const latest = await latestJsonFile(moduleActivityDir);
   const raw = await readFile(latest, "utf8");
   const modules = JSON.parse(raw) as ModuleActivityProjection[];
 
-  const outputDir = join(root, "outputs", "skills", "architecture");
+  const outputDir = outputsDir("skills", "architecture");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "SKILL.md");
 
   const invariantsFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "architectural-invariants")
+    knowledgeDir("projections", "architectural-invariants")
   );
 
   const invariants = JSON.parse(

@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { outputsDir } from "../../core/shared/workspace";
+
 type HotspotReason =
   | "high_change_frequency"
   | "high_module_coupling"
@@ -85,7 +87,6 @@ function renderMarkdown(items: ModuleHotspot[]): string {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
   const hotspotsFile = process.argv[2];
 
   if (!hotspotsFile) {
@@ -95,7 +96,7 @@ async function main() {
   const raw = await readFile(hotspotsFile, "utf8");
   const items = JSON.parse(raw) as ModuleHotspot[];
 
-  const outputDir = join(repositoryPath, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "hotspots.md");

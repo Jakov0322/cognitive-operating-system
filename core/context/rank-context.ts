@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CONTEXT_ARTIFACTS } from "./artifact-registry";
 import { rankArtifacts } from "./relevance-engine";
+import { outputsDir } from "../shared/workspace";
 
 function renderMarkdown(
   task: string,
@@ -55,7 +56,6 @@ function renderMarkdown(
 }
 
 async function main() {
-  const root = process.cwd();
   const task = process.argv.slice(2).join(" ").trim();
 
   if (!task) {
@@ -64,7 +64,7 @@ async function main() {
 
   const ranked = await rankArtifacts(task, CONTEXT_ARTIFACTS);
 
-  const outputDir = join(root, "outputs", "context-packs");
+  const outputDir = outputsDir("context-packs");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "ranked-context.md");

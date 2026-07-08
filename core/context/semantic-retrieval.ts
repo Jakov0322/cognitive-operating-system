@@ -5,6 +5,7 @@ import { CONTEXT_ARTIFACTS } from "./artifact-registry";
 import { embedText } from "../embeddings/embedding-client";
 import { cosineSimilarity } from "../embeddings/vector-math";
 import { EmbeddingRecord } from "../../knowledge/schemas/embedding";
+import { knowledgeDir } from "../shared/workspace";
 
 export type SemanticMatch = {
   path: string;
@@ -19,10 +20,8 @@ export type SemanticRetrievalResult = {
 const TOP_K = 6;
 const EMPTY_RESULT: SemanticRetrievalResult = { modules: [], matches: [] };
 
-async function latestEmbeddingsFile(
-  repositoryPath: string
-): Promise<string | null> {
-  const dir = join(repositoryPath, "knowledge", "embeddings");
+async function latestEmbeddingsFile(): Promise<string | null> {
+  const dir = knowledgeDir("embeddings");
 
   let files: string[];
 
@@ -43,8 +42,7 @@ async function latestEmbeddingsFile(
 export async function semanticRetrieval(
   task: string
 ): Promise<SemanticRetrievalResult> {
-  const repositoryPath = process.cwd();
-  const embeddingsFile = await latestEmbeddingsFile(repositoryPath);
+  const embeddingsFile = await latestEmbeddingsFile();
 
   if (!embeddingsFile) {
     return EMPTY_RESULT;

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { classifyEvent } from "../shared/event-classification";
 import { shouldIgnoreForModuleInference } from "../shared/path-filters";
+import { knowledgeDir } from "../shared/workspace";
 
 type TimelineDay = {
   date: string;
@@ -87,7 +88,6 @@ function buildActivityTimeline(events: NormalizedEvent[]): TimelineDay[] {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
   const files = process.argv.slice(2);
 
   if (files.length === 0) {
@@ -103,7 +103,7 @@ async function main() {
 
   const timeline = buildActivityTimeline(events);
 
-  const outputDir = join(repositoryPath, "knowledge", "projections", "timeline");
+  const outputDir = knowledgeDir("projections", "timeline");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `activity-timeline-${Date.now()}.json`);

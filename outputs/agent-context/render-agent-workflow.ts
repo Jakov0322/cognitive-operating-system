@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { outputsDir } from "../../core/shared/workspace";
+
 function renderWorkflow(): string {
   return `# Agent Workflow
 
@@ -64,9 +66,7 @@ Never start a non-trivial code change without preparing context first.
 }
 
 async function main() {
-  const root = process.cwd();
-
-  const outputDir = join(root, "outputs", "agent-context");
+  const outputDir = outputsDir("agent-context");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "WORKFLOW.md");

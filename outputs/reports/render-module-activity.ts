@@ -1,6 +1,8 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { outputsDir } from "../../core/shared/workspace";
+
 type ModuleActivityProjection = {
   moduleId: string;
   changeCount: number;
@@ -59,7 +61,6 @@ function renderMarkdown(items: ModuleActivityProjection[]): string {
 }
 
 async function main() {
-  const repositoryPath = process.cwd();
   const projectionFile = process.argv[2];
 
   if (!projectionFile) {
@@ -69,7 +70,7 @@ async function main() {
   const raw = await readFile(projectionFile, "utf8");
   const items = JSON.parse(raw) as ModuleActivityProjection[];
 
-  const outputDir = join(repositoryPath, "outputs", "reports");
+  const outputDir = outputsDir("reports");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, "module-activity.md");

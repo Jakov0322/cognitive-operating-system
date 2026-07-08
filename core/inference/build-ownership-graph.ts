@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { OwnershipGraph } from "../../knowledge/schemas/ownership-graph";
 import { confidenceFromWeightedCount } from "../shared/confidence";
+import { knowledgeDir } from "../shared/workspace";
 
 type ExpertiseProfile = {
   personId: string;
@@ -37,10 +38,8 @@ function label(id: string): string {
 }
 
 async function main() {
-  const root = process.cwd();
-
   const expertiseFile = await latestJsonFile(
-    join(root, "knowledge", "projections", "expertise")
+    knowledgeDir("projections", "expertise")
   );
 
   const profiles = JSON.parse(
@@ -84,7 +83,7 @@ async function main() {
     edges: edges.sort((a, b) => b.weight - a.weight),
   };
 
-  const outputDir = join(root, "knowledge", "projections", "ownership-graph");
+  const outputDir = knowledgeDir("projections", "ownership-graph");
   await mkdir(outputDir, { recursive: true });
 
   const outputPath = join(outputDir, `ownership-graph-${Date.now()}.json`);
