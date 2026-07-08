@@ -53,6 +53,34 @@ async function main() {
     console.log("Skipping GitHub ingestion (no GITHUB_TOKEN or fetch failed).");
   }
 
+  try {
+    await run("npm", ["run", "linear:fetch"]);
+    await run("npm", ["run", "linear:normalize"]);
+  } catch {
+    console.log("Skipping Linear ingestion (no LINEAR_API_KEY or fetch failed).");
+  }
+
+  try {
+    await run("npm", ["run", "ci:fetch"]);
+    await run("npm", ["run", "ci:normalize"]);
+  } catch {
+    console.log("Skipping CI ingestion (no GITHUB_TOKEN or fetch failed).");
+  }
+
+  try {
+    await run("npm", ["run", "jira:fetch"]);
+    await run("npm", ["run", "jira:normalize"]);
+  } catch {
+    console.log("Skipping Jira ingestion (missing Jira credentials or fetch failed).");
+  }
+
+  try {
+    await run("npm", ["run", "slack:fetch"]);
+    await run("npm", ["run", "slack:normalize"]);
+  } catch {
+    console.log("Skipping Slack ingestion (missing Slack credentials or fetch failed).");
+  }
+
   const normalizedFiles = await allJsonFiles(
     join(root, "knowledge", "events", "normalized")
   );

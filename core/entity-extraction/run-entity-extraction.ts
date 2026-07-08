@@ -5,6 +5,7 @@ import { extractAuthors } from "./extract-authors";
 import { extractModules } from "./extract-modules";
 import { extractIssues } from "./extract-issues";
 import { extractPullRequests } from "./extract-pull-requests";
+import { extractCIJobs } from "./extract-ci-jobs";
 import { Entity } from "../../knowledge/schemas/entity";
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 
@@ -58,6 +59,7 @@ async function main() {
     ...extractAuthors(events),
     ...extractIssues(events),
     ...extractPullRequests(events),
+    ...extractCIJobs(events),
   ]);
 
   const outputPath = join(entitiesDir, `entities-${Date.now()}.json`);

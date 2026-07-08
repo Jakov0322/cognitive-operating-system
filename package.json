@@ -5,6 +5,18 @@
     "github:fetch": "tsx connectors/github/fetch-github.ts",
     "github:normalize": "tsx connectors/github/normalize-github-events.ts",
 
+    "linear:fetch": "tsx connectors/linear/fetch-linear.ts",
+    "linear:normalize": "tsx connectors/linear/normalize-linear-events.ts",
+
+    "ci:fetch": "tsx connectors/ci/fetch-ci.ts",
+    "ci:normalize": "tsx connectors/ci/normalize-ci-events.ts",
+
+    "jira:fetch": "tsx connectors/jira/fetch-jira.ts",
+    "jira:normalize": "tsx connectors/jira/normalize-jira-events.ts",
+
+    "slack:fetch": "tsx connectors/slack/fetch-slack.ts",
+    "slack:normalize": "tsx connectors/slack/normalize-slack-events.ts",
+
     "extract:entities": "tsx core/entity-extraction/run-entity-extraction.ts",
     "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts",
 
