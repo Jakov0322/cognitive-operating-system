@@ -9,35 +9,26 @@
   },
   "scripts": {
     "scan:git": "tsx connectors/local/git/scan-git.ts",
-
     "github:fetch": "tsx connectors/github/fetch-github.ts",
     "github:normalize": "tsx connectors/github/normalize-github-events.ts",
-
     "linear:fetch": "tsx connectors/linear/fetch-linear.ts",
     "linear:normalize": "tsx connectors/linear/normalize-linear-events.ts",
-
     "ci:fetch": "tsx connectors/ci/fetch-ci.ts",
     "ci:normalize": "tsx connectors/ci/normalize-ci-events.ts",
-
     "jira:fetch": "tsx connectors/jira/fetch-jira.ts",
     "jira:normalize": "tsx connectors/jira/normalize-jira-events.ts",
-
     "slack:fetch": "tsx connectors/slack/fetch-slack.ts",
     "slack:normalize": "tsx connectors/slack/normalize-slack-events.ts",
-
     "extract:entities": "tsx core/entity-extraction/run-entity-extraction.ts",
     "extract:relations": "tsx core/relation-extraction/run-relation-extraction.ts",
-
     "project:module-activity": "tsx core/timeline-engine/build-module-activity.ts",
     "project:timeline": "tsx core/timeline-engine/build-activity-timeline.ts",
-
     "infer:hotspots": "tsx core/inference/infer-hotspots.ts",
     "infer:architectural-invariants": "tsx core/inference/infer-architectural-invariants.ts",
     "infer:expertise": "tsx core/inference/infer-expertise.ts",
     "infer:ownership-graph": "tsx core/inference/build-ownership-graph.ts",
     "infer:bus-factor": "tsx core/inference/infer-bus-factor.ts",
     "infer:architectural-drift": "tsx core/inference/infer-architectural-drift.ts",
-
     "render:module-activity": "tsx outputs/reports/render-module-activity.ts",
     "render:hotspots": "tsx outputs/reports/render-hotspots.ts",
     "render:timeline": "tsx outputs/reports/render-timeline.ts",
@@ -45,10 +36,8 @@
     "render:expertise": "tsx outputs/reports/render-expertise.ts",
     "render:ownership-graph": "tsx outputs/reports/render-ownership-graph.ts",
     "render:bus-factor": "tsx outputs/reports/render-bus-factor.ts",
-
     "render:agent-context": "tsx outputs/agent-context/render-agent-context.ts",
     "render:agent-workflow": "tsx outputs/agent-context/render-agent-workflow.ts",
-
     "render:skill:risk-hotspots": "tsx outputs/skills/render-risk-hotspots-skill.ts",
     "render:skill:architecture": "tsx outputs/skills/render-architecture-skill.ts",
     "render:skill:codebase-navigation": "tsx outputs/skills/render-codebase-navigation-skill.ts",
@@ -56,7 +45,6 @@
     "render:skill:onboarding": "tsx outputs/skills/render-onboarding-skill.ts",
     "render:skill:index": "tsx outputs/skills/render-skill-index.ts",
     "render:skill:human-cognition": "tsx outputs/skills/render-human-cognition-skill.ts",
-
     "context:pack": "tsx outputs/context-packs/render-context-pack.ts",
     "context:connectors": "tsx outputs/context-packs/render-context-pack.ts connectors",
     "context:core": "tsx outputs/context-packs/render-context-pack.ts core",
@@ -66,12 +54,9 @@
     "context:compress": "tsx core/context/compress-context.ts",
     "context:prepare": "tsx core/context/prepare-task-context.ts",
     "rank:context": "tsx core/context/rank-context.ts",
-
     "snapshot:repository": "tsx core/memory/build-repository-snapshot.ts",
     "compare:snapshots": "tsx core/memory/compare-snapshots.ts",
-
     "build:embeddings": "tsx core/embeddings/build-embeddings.ts",
-
     "analyze": "tsx core/orchestration/run-analysis.ts"
   },
   "devDependencies": {
@@ -79,7 +64,9 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "dotenv": "^17.4.2",
-    "tsx": "^4.22.0"
+    "tsx": "^4.22.0",
+    "zod": "^4.4.3"
   }
 }
