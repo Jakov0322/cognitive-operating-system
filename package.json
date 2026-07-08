@@ -1,9 +1,20 @@
 {
   "name": "cognitive-os",
   "version": "0.1.0",
+  "description": "Project intelligence layer: analyzes a git repository's history and connected tools (GitHub, Linear, Jira, Slack, CI) to generate ownership, risk, and architecture context for humans and AI agents.",
+  "license": "MIT",
   "bin": {
     "cognitive-os": "./bin/cognitive-os.js"
   },
+  "files": [
+    "bin",
+    "connectors",
+    "core",
+    "knowledge",
+    "outputs",
+    "tsconfig.json",
+    ".env.example"
+  ],
   "engines": {
     "node": ">=18.19"
   },
