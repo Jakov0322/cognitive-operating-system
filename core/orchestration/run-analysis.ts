@@ -3,17 +3,21 @@ import { promisify } from "node:util";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-import { knowledgeDir } from "../shared/workspace";
+import { getRepoRoot, knowledgeDir } from "../shared/workspace";
 
 const execFileAsync = promisify(execFile);
 
-async function run(command: string, args: string[]) {
-  console.log(`\n> ${command} ${args.join(" ")}`);
+const PACKAGE_ROOT = join(__dirname, "..", "..");
+const TSX_CLI = require.resolve("tsx/cli");
 
-  const { stdout, stderr } = await execFileAsync(command, args, {
-    maxBuffer: 1024 * 1024 * 20,
-    shell: true,
-  });
+async function runScript(relativeScriptPath: string, args: string[] = []) {
+  console.log(`\n> tsx ${relativeScriptPath} ${args.join(" ")}`);
+
+  const { stdout, stderr } = await execFileAsync(
+    process.execPath,
+    [TSX_CLI, join(PACKAGE_ROOT, relativeScriptPath), ...args],
+    { maxBuffer: 1024 * 1024 * 20, cwd: getRepoRoot() }
+  );
 
   if (stdout) console.log(stdout);
   if (stderr) console.error(stderr);
@@ -44,39 +48,39 @@ async function allJsonFiles(dir: string): Promise<string[]> {
 }
 
 async function main() {
-  await run("npm", ["run", "scan:git"]);
+  await runScript("connectors/local/git/scan-git.ts");
 
   try {
-    await run("npm", ["run", "github:fetch"]);
-    await run("npm", ["run", "github:normalize"]);
+    await runScript("connectors/github/fetch-github.ts");
+    await runScript("connectors/github/normalize-github-events.ts");
   } catch {
     console.log("Skipping GitHub ingestion (no GITHUB_TOKEN or fetch failed).");
   }
 
   try {
-    await run("npm", ["run", "linear:fetch"]);
-    await run("npm", ["run", "linear:normalize"]);
+    await runScript("connectors/linear/fetch-linear.ts");
+    await runScript("connectors/linear/normalize-linear-events.ts");
   } catch {
     console.log("Skipping Linear ingestion (no LINEAR_API_KEY or fetch failed).");
   }
 
   try {
-    await run("npm", ["run", "ci:fetch"]);
-    await run("npm", ["run", "ci:normalize"]);
+    await runScript("connectors/ci/fetch-ci.ts");
+    await runScript("connectors/ci/normalize-ci-events.ts");
   } catch {
     console.log("Skipping CI ingestion (no GITHUB_TOKEN or fetch failed).");
   }
 
   try {
-    await run("npm", ["run", "jira:fetch"]);
-    await run("npm", ["run", "jira:normalize"]);
+    await runScript("connectors/jira/fetch-jira.ts");
+    await runScript("connectors/jira/normalize-jira-events.ts");
   } catch {
     console.log("Skipping Jira ingestion (missing Jira credentials or fetch failed).");
   }
 
   try {
-    await run("npm", ["run", "slack:fetch"]);
-    await run("npm", ["run", "slack:normalize"]);
+    await runScript("connectors/slack/fetch-slack.ts");
+    await runScript("connectors/slack/normalize-slack-events.ts");
   } catch {
     console.log("Skipping Slack ingestion (missing Slack credentials or fetch failed).");
   }
@@ -85,25 +89,25 @@ async function main() {
     knowledgeDir("events", "normalized")
   );
 
-  await run("npm", ["run", "extract:entities", "--", ...normalizedFiles]);
-  await run("npm", ["run", "extract:relations", "--", ...normalizedFiles]);
-  await run("npm", ["run", "project:timeline", "--", ...normalizedFiles]);
+  await runScript("core/entity-extraction/run-entity-extraction.ts", normalizedFiles);
+  await runScript("core/relation-extraction/run-relation-extraction.ts", normalizedFiles);
+  await runScript("core/timeline-engine/build-activity-timeline.ts", normalizedFiles);
 
   const relationsFile = await latestJsonFile(
     knowledgeDir("graph", "relations")
   );
 
-  await run("npm", ["run", "project:module-activity", "--", relationsFile]);
+  await runScript("core/timeline-engine/build-module-activity.ts", [relationsFile]);
 
   const moduleActivityFile = await latestJsonFile(
     knowledgeDir("projections", "module-activity")
   );
 
-  await run("npm", ["run", "infer:hotspots", "--", moduleActivityFile]);
-  await run("npm", ["run", "infer:architectural-invariants"]);
-  await run("npm", ["run", "infer:expertise"]);
-  await run("npm", ["run", "infer:ownership-graph"]);
-  await run("npm", ["run", "infer:bus-factor"]);
+  await runScript("core/inference/infer-hotspots.ts", [moduleActivityFile]);
+  await runScript("core/inference/infer-architectural-invariants.ts");
+  await runScript("core/inference/infer-expertise.ts");
+  await runScript("core/inference/build-ownership-graph.ts");
+  await runScript("core/inference/infer-bus-factor.ts");
 
   const hotspotsFile = await latestJsonFile(
     knowledgeDir("projections", "hotspots")
@@ -113,45 +117,45 @@ async function main() {
     knowledgeDir("projections", "timeline")
   );
 
-  await run("npm", ["run", "render:module-activity", "--", moduleActivityFile]);
-  await run("npm", ["run", "render:hotspots", "--", hotspotsFile]);
-  await run("npm", ["run", "render:timeline", "--", timelineFile]);
-  await run("npm", ["run", "render:architectural-invariants"]);
-  await run("npm", ["run", "render:expertise"]);
-  await run("npm", ["run", "render:ownership-graph"]);
-  await run("npm", ["run", "render:bus-factor"]);
-  await run("npm", ["run", "render:agent-context"]);
-  await run("npm", ["run", "render:agent-workflow"]);
+  await runScript("outputs/reports/render-module-activity.ts", [moduleActivityFile]);
+  await runScript("outputs/reports/render-hotspots.ts", [hotspotsFile]);
+  await runScript("outputs/reports/render-timeline.ts", [timelineFile]);
+  await runScript("outputs/reports/render-architectural-invariants.ts");
+  await runScript("outputs/reports/render-expertise.ts");
+  await runScript("outputs/reports/render-ownership-graph.ts");
+  await runScript("outputs/reports/render-bus-factor.ts");
+  await runScript("outputs/agent-context/render-agent-context.ts");
+  await runScript("outputs/agent-context/render-agent-workflow.ts");
 
-  await run("npm", ["run", "render:skill:risk-hotspots"]);
-  await run("npm", ["run", "render:skill:architecture"]);
-  await run("npm", ["run", "render:skill:codebase-navigation"]);
-  await run("npm", ["run", "render:skill:project-timeline"]);
-  await run("npm", ["run", "render:skill:onboarding"]);
-  await run("npm", ["run", "render:skill:human-cognition"]);
-  await run("npm", ["run", "render:skill:index"]);
+  await runScript("outputs/skills/render-risk-hotspots-skill.ts");
+  await runScript("outputs/skills/render-architecture-skill.ts");
+  await runScript("outputs/skills/render-codebase-navigation-skill.ts");
+  await runScript("outputs/skills/render-project-timeline-skill.ts");
+  await runScript("outputs/skills/render-onboarding-skill.ts");
+  await runScript("outputs/skills/render-human-cognition-skill.ts");
+  await runScript("outputs/skills/render-skill-index.ts");
 
-  await run("npm", ["run", "context:core"]);
-  await run("npm", ["run", "context:connectors"]);
-  await run("npm", ["run", "context:knowledge"]);
-  await run("npm", ["run", "context:outputs"]);
+  await runScript("outputs/context-packs/render-context-pack.ts", ["core"]);
+  await runScript("outputs/context-packs/render-context-pack.ts", ["connectors"]);
+  await runScript("outputs/context-packs/render-context-pack.ts", ["knowledge"]);
+  await runScript("outputs/context-packs/render-context-pack.ts", ["outputs"]);
 
   try {
-    await run("npm", ["run", "build:embeddings"]);
+    await runScript("core/embeddings/build-embeddings.ts");
   } catch {
     console.log("Skipping embedding build (no VOYAGE_API_KEY or embedding request failed).");
   }
 
-  await run("npm", ["run", "snapshot:repository"]);
+  await runScript("core/memory/build-repository-snapshot.ts");
 
   try {
-    await run("npm", ["run", "compare:snapshots"]);
+    await runScript("core/memory/compare-snapshots.ts");
   } catch {
     console.log("Skipping snapshot comparison.");
   }
 
   try {
-    await run("npm", ["run", "infer:architectural-drift"]);
+    await runScript("core/inference/infer-architectural-drift.ts");
   } catch {
     console.log("Skipping architectural drift inference.");
   }
