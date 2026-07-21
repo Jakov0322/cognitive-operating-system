@@ -1,20 +1,10 @@
-import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import { ArchitecturalInvariant } from "../../knowledge/schemas/architectural-invariant";
 import { BusFactorRisk } from "../../knowledge/schemas/bus-factor";
 import { ExpertiseProfile } from "../../knowledge/schemas/expertise-profile";
 import { checkChangeRisk, ChangeRiskReport } from "../inference/check-change-risk";
-import { knowledgeDir, latestJsonFile } from "../shared/workspace";
-
-async function readLatestProjectionOrEmpty<T>(projectionName: string): Promise<T[]> {
-  try {
-    const file = await latestJsonFile(knowledgeDir("projections", projectionName));
-    return JSON.parse(await readFile(file, "utf8")) as T[];
-  } catch {
-    return [];
-  }
-}
+import { readLatestProjectionOrEmpty } from "../shared/read-projection";
 
 const RISK_BADGE: Record<ChangeRiskReport["overallRiskLevel"], string> = {
   low: "LOW",

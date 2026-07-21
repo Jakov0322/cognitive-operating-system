@@ -5,6 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 import { knowledgeDir, latestJsonFile } from "../shared/workspace";
+import { readLatestProjectionOrEmpty } from "../shared/read-projection";
 import { rankArtifacts } from "../context/relevance-engine";
 import { CONTEXT_ARTIFACTS } from "../context/artifact-registry";
 import { OwnershipGraph } from "../../knowledge/schemas/ownership-graph";
@@ -38,13 +39,6 @@ async function readLatestProjection<T>(projectionName: string): Promise<T> {
   return JSON.parse(raw) as T;
 }
 
-async function readLatestProjectionOrEmpty<T>(projectionName: string): Promise<T[]> {
-  try {
-    return await readLatestProjection<T[]>(projectionName);
-  } catch {
-    return [];
-  }
-}
 
 server.registerTool(
   "rank_context",

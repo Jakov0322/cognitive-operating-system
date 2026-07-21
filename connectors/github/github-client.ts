@@ -124,6 +124,35 @@ export class GitHubClient {
     return response.json() as Promise<T>;
   }
 
+  private async write<T>(
+    path: string,
+    method: "POST" | "PATCH",
+    body: unknown
+  ): Promise<T> {
+    if (!this.options.token) {
+      throw new Error("GitHub token is required to write to the GitHub API");
+    }
+
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method,
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${this.options.token}`,
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `GitHub request failed: ${response.status} ${response.statusText}`
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
+
   async listPullRequests(): Promise<RawGitHubPullRequest[]> {
     const raw = await this.request<GitHubApiPullRequest[]>(
       `/repos/${this.options.owner}/${this.options.repo}/pulls?state=all&per_page=100`
@@ -149,5 +178,31 @@ export class GitHubClient {
     );
 
     return raw.map((comment) => mapComment(comment, parentType, issueNumber));
+  }
+
+  async createIssueComment(
+    issueNumber: number,
+    body: string
+  ): Promise<{ id: number; url: string }> {
+    const raw = await this.write<GitHubApiComment>(
+      `/repos/${this.options.owner}/${this.options.repo}/issues/${issueNumber}/comments`,
+      "POST",
+      { body }
+    );
+
+    return { id: raw.id, url: raw.html_url };
+  }
+
+  async updateIssueComment(
+    commentId: number,
+    body: string
+  ): Promise<{ id: number; url: string }> {
+    const raw = await this.write<GitHubApiComment>(
+      `/repos/${this.options.owner}/${this.options.repo}/issues/comments/${commentId}`,
+      "PATCH",
+      { body }
+    );
+
+    return { id: raw.id, url: raw.html_url };
   }
 }

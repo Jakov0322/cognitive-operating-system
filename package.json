@@ -71,6 +71,7 @@
     "build:embeddings": "tsx core/embeddings/build-embeddings.ts",
     "analyze": "tsx core/orchestration/run-analysis.ts",
     "check": "tsx core/orchestration/run-check-change-risk.ts",
+    "pr-comment": "tsx core/orchestration/run-post-pr-risk-comment.ts",
     "test": "vitest run"
   },
   "devDependencies": {

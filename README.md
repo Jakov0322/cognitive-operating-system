@@ -15,6 +15,18 @@ npx cognitive-os check <file> [file...]
 
 Prints a combined risk report for the given file paths: hotspot score, bus factor, architectural invariants that apply, and which contributors have the most expertise in each touched module. Run this before making changes to decide how careful to be and who to loop in. Uses the data from the last `analyze` run — run `analyze` at least once first.
 
+## PR risk comment (GitHub Action)
+
+`.github/workflows/pr-risk-check.yml` runs `analyze` and posts the same risk report from `check` as a comment on the pull request, so the same signal that's available to agents via MCP is also visible to reviewers. It updates its own comment in place on subsequent pushes instead of piling up duplicates. Uses the repository's default `GITHUB_TOKEN` — no extra secrets required, and no external connector credentials needed since hotspots/bus-factor/invariants/expertise are all derived from local git history.
+
+To run it manually or from your own CI:
+
+```bash
+npx cognitive-os pr-comment --files-from changed-files.txt
+```
+
+Requires `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_TOKEN`, and `PR_NUMBER` in the environment. `--files-from` reads newline-separated file paths from a file (safer than passing many files as argv); you can also pass file paths directly as arguments.
+
 ## MCP Server
 
 `cognitive-os mcp` starts an MCP server (stdio transport) that exposes the same generated intelligence as live tools an agent can call during a session, instead of reading static Markdown reports:
