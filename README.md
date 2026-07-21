@@ -9,6 +9,8 @@ npx cognitive-os analyze
 
 Run from the root of any git repository. Generates evidence-based project intelligence (hotspots, ownership, bus factor, architectural invariants, drift, expertise) under `.cognitive-os/` in that repository. Credentials for optional connectors (GitHub, Linear, Jira, Slack, CI, embeddings) are read from a `.env` file in the same directory — see `.env.example`. Any connector without credentials is skipped gracefully.
 
+The git history scan is incremental by default: after the first run it remembers the last scanned commit and only scans new commits on subsequent runs, instead of re-walking the full history every time. Use `analyze --since <ref>` to scan a specific range (e.g. after a rebase or to backfill a gap), or `analyze --full` to force a full rescan from scratch.
+
 ```bash
 npx cognitive-os check <file> [file...]
 ```

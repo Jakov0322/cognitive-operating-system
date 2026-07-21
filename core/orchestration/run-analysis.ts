@@ -52,8 +52,24 @@ async function allJsonFiles(dir: string): Promise<string[]> {
     .map((file) => join(dir, file));
 }
 
+export function parseGitScanArgs(argv: string[]): string[] {
+  const passthrough: string[] = [];
+
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--since") {
+      passthrough.push("--since", argv[++i]);
+    } else if (argv[i] === "--full") {
+      passthrough.push("--full");
+    }
+  }
+
+  return passthrough;
+}
+
 async function main() {
-  await runScript("connectors/local/git/scan-git.ts");
+  const gitScanArgs = parseGitScanArgs(process.argv.slice(2));
+
+  await runScript("connectors/local/git/scan-git.ts", gitScanArgs);
 
   try {
     await runScript("connectors/github/fetch-github.ts");
@@ -168,7 +184,9 @@ async function main() {
   console.log("\nAnalysis completed.");
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
