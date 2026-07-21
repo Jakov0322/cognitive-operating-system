@@ -1,11 +1,12 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { BusFactorRisk } from "../../knowledge/schemas/bus-factor";
 import { confidenceFromWeightedCount } from "../shared/confidence";
 import { knowledgeDir } from "../shared/workspace";
 
-type OwnershipGraph = {
+export type OwnershipGraph = {
   edges: {
     from: string;
     to: string;
@@ -30,19 +31,13 @@ async function latestJsonFile(dir: string): Promise<string> {
   return join(dir, latest);
 }
 
-function riskLevel(busFactor: number): "low" | "medium" | "high" {
+export function riskLevel(busFactor: number): "low" | "medium" | "high" {
   if (busFactor <= 1) return "high";
   if (busFactor === 2) return "medium";
   return "low";
 }
 
-async function main() {
-  const graphFile = await latestJsonFile(
-    knowledgeDir("projections", "ownership-graph")
-  );
-
-  const graph = JSON.parse(await readFile(graphFile, "utf8")) as OwnershipGraph;
-
+export function computeBusFactorRisks(graph: OwnershipGraph): BusFactorRisk[] {
   const byModule = new Map<
     string,
     {
@@ -99,6 +94,18 @@ async function main() {
     });
   }
 
+  return risks;
+}
+
+async function main() {
+  const graphFile = await latestJsonFile(
+    knowledgeDir("projections", "ownership-graph")
+  );
+
+  const graph = JSON.parse(await readFile(graphFile, "utf8")) as OwnershipGraph;
+
+  const risks = computeBusFactorRisks(graph);
+
   const outputDir = knowledgeDir("projections", "bus-factor");
   await mkdir(outputDir, { recursive: true });
 
@@ -110,7 +117,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

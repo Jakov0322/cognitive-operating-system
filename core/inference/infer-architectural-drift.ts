@@ -1,10 +1,11 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { ArchitecturalDriftSignal } from "../../knowledge/schemas/architectural-drift";
 import { knowledgeDir } from "../shared/workspace";
 
-type SnapshotDiff = {
+export type SnapshotDiff = {
   changes: {
     hotspotCountDelta: number;
     moduleCountDelta: number;
@@ -13,7 +14,7 @@ type SnapshotDiff = {
   signals: string[];
 };
 
-type ModuleActivity = {
+export type ModuleActivity = {
   moduleId: string;
   relatedModules: string[];
   authors: string[];
@@ -36,29 +37,16 @@ async function latestJsonFile(dir: string): Promise<string> {
   return join(dir, latest);
 }
 
-function severity(score: number): "low" | "medium" | "high" {
+export function severity(score: number): "low" | "medium" | "high" {
   if (score >= 0.8) return "high";
   if (score >= 0.5) return "medium";
   return "low";
 }
 
-async function main() {
-  const diffFile = await latestJsonFile(
-    knowledgeDir("projections", "snapshot-diffs")
-  );
-
-  const moduleActivityFile = await latestJsonFile(
-    knowledgeDir("projections", "module-activity")
-  );
-
-  const diff = JSON.parse(
-    await readFile(diffFile, "utf8")
-  ) as SnapshotDiff;
-
-  const modules = JSON.parse(
-    await readFile(moduleActivityFile, "utf8")
-  ) as ModuleActivity[];
-
+export function inferDriftSignals(
+  diff: SnapshotDiff,
+  modules: ModuleActivity[]
+): ArchitecturalDriftSignal[] {
   const drifts: ArchitecturalDriftSignal[] = [];
 
   if (diff.changes.hotspotCountDelta > 0) {
@@ -167,6 +155,28 @@ async function main() {
     }
   }
 
+  return drifts;
+}
+
+async function main() {
+  const diffFile = await latestJsonFile(
+    knowledgeDir("projections", "snapshot-diffs")
+  );
+
+  const moduleActivityFile = await latestJsonFile(
+    knowledgeDir("projections", "module-activity")
+  );
+
+  const diff = JSON.parse(
+    await readFile(diffFile, "utf8")
+  ) as SnapshotDiff;
+
+  const modules = JSON.parse(
+    await readFile(moduleActivityFile, "utf8")
+  ) as ModuleActivity[];
+
+  const drifts = inferDriftSignals(diff, modules);
+
   const outputDir = knowledgeDir("projections", "architectural-drift");
 
   await mkdir(outputDir, { recursive: true });
@@ -182,7 +192,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

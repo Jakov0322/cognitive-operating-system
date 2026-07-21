@@ -1,11 +1,12 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { OwnershipGraph } from "../../knowledge/schemas/ownership-graph";
 import { confidenceFromWeightedCount } from "../shared/confidence";
 import { knowledgeDir } from "../shared/workspace";
 
-type ExpertiseProfile = {
+export type ExpertiseProfile = {
   personId: string;
   strongestModules: {
     moduleId: string;
@@ -33,19 +34,14 @@ async function latestJsonFile(dir: string): Promise<string> {
   return join(dir, latest);
 }
 
-function label(id: string): string {
+export function label(id: string): string {
   return id.replace(/^person\./, "").replace(/^module\./, "");
 }
 
-async function main() {
-  const expertiseFile = await latestJsonFile(
-    knowledgeDir("projections", "expertise")
-  );
-
-  const profiles = JSON.parse(
-    await readFile(expertiseFile, "utf8")
-  ) as ExpertiseProfile[];
-
+export function buildOwnershipGraph(
+  profiles: ExpertiseProfile[],
+  now: string = new Date().toISOString()
+): OwnershipGraph {
   const nodes = new Map<string, OwnershipGraph["nodes"][number]>();
   const edges: OwnershipGraph["edges"] = [];
 
@@ -76,12 +72,24 @@ async function main() {
     }
   }
 
-  const graph: OwnershipGraph = {
+  return {
     id: `ownership-graph.${Date.now()}`,
-    generatedAt: new Date().toISOString(),
+    generatedAt: now,
     nodes: Array.from(nodes.values()),
     edges: edges.sort((a, b) => b.weight - a.weight),
   };
+}
+
+async function main() {
+  const expertiseFile = await latestJsonFile(
+    knowledgeDir("projections", "expertise")
+  );
+
+  const profiles = JSON.parse(
+    await readFile(expertiseFile, "utf8")
+  ) as ExpertiseProfile[];
+
+  const graph = buildOwnershipGraph(profiles);
 
   const outputDir = knowledgeDir("projections", "ownership-graph");
   await mkdir(outputDir, { recursive: true });
@@ -95,7 +103,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { knowledgeDir } from "../shared/workspace";
@@ -8,7 +9,7 @@ import { extractAuthorshipRelations } from "./extract-authorship-relations";
 import { extractModuleChangeRelations } from "./extract-module-change-relations";
 import { extractIssueResolutionRelations } from "./extract-issue-resolution-relations";
 
-function mergeRelations(relations: Relation[]): Relation[] {
+export function mergeRelations(relations: Relation[]): Relation[] {
   const map = new Map<string, Relation>();
 
   for (const relation of relations) {
@@ -62,7 +63,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

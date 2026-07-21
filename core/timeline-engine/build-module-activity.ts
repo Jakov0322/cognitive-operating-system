@@ -1,10 +1,11 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { Relation } from "../../knowledge/schemas/relation";
 import { knowledgeDir } from "../shared/workspace";
 
-type ModuleActivityProjection = {
+export type ModuleActivityProjection = {
   moduleId: string;
   changeCount: number;
   authors: string[];
@@ -13,7 +14,7 @@ type ModuleActivityProjection = {
   updatedAt: string;
 };
 
-function buildModuleActivity(relations: Relation[]): ModuleActivityProjection[] {
+export function buildModuleActivity(relations: Relation[]): ModuleActivityProjection[] {
   const modules = new Map<string, ModuleActivityProjection>();
 
   function ensureModule(moduleId: string): ModuleActivityProjection {
@@ -109,7 +110,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

@@ -1,11 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { ArchitecturalInvariant } from "../../knowledge/schemas/architectural-invariant";
 import { confidence } from "../shared/confidence";
 import { knowledgeDir } from "../shared/workspace";
 
-function inferArchitecturalInvariants(): ArchitecturalInvariant[] {
+export function inferArchitecturalInvariants(): ArchitecturalInvariant[] {
   const now = new Date().toISOString();
 
   return [
@@ -110,7 +111,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

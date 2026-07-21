@@ -1,10 +1,11 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { SnapshotDiff } from "../../knowledge/schemas/snapshot-diff";
 import { knowledgeDir } from "../shared/workspace";
 
-type RepositorySnapshot = {
+export type RepositorySnapshot = {
   id: string;
 
   summary: {
@@ -32,7 +33,7 @@ async function loadJson<T>(path: string): Promise<T> {
   return JSON.parse(await readFile(path, "utf8")) as T;
 }
 
-function inferSignals(
+export function inferSignals(
   previous: RepositorySnapshot,
   current: RepositorySnapshot
 ): string[] {
@@ -57,18 +58,15 @@ function inferSignals(
   return signals;
 }
 
-async function main() {
-  const snapshotDir = knowledgeDir("snapshots");
-
-  const [previousPath, currentPath] = await latestSnapshots(snapshotDir);
-
-  const previous = await loadJson<RepositorySnapshot>(previousPath);
-  const current = await loadJson<RepositorySnapshot>(currentPath);
-
-  const diff: SnapshotDiff = {
+export function buildSnapshotDiff(
+  previous: RepositorySnapshot,
+  current: RepositorySnapshot,
+  now: string = new Date().toISOString()
+): SnapshotDiff {
+  return {
     id: `snapshot-diff.${Date.now()}`,
 
-    createdAt: new Date().toISOString(),
+    createdAt: now,
 
     snapshots: {
       previous: previous.id,
@@ -91,6 +89,17 @@ async function main() {
 
     signals: inferSignals(previous, current),
   };
+}
+
+async function main() {
+  const snapshotDir = knowledgeDir("snapshots");
+
+  const [previousPath, currentPath] = await latestSnapshots(snapshotDir);
+
+  const previous = await loadJson<RepositorySnapshot>(previousPath);
+  const current = await loadJson<RepositorySnapshot>(currentPath);
+
+  const diff = buildSnapshotDiff(previous, current);
 
   const outputDir = knowledgeDir("projections", "snapshot-diffs");
 
@@ -106,7 +115,9 @@ async function main() {
   console.log(`Saved snapshot diff to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

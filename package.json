@@ -68,11 +68,13 @@
     "snapshot:repository": "tsx core/memory/build-repository-snapshot.ts",
     "compare:snapshots": "tsx core/memory/compare-snapshots.ts",
     "build:embeddings": "tsx core/embeddings/build-embeddings.ts",
-    "analyze": "tsx core/orchestration/run-analysis.ts"
+    "analyze": "tsx core/orchestration/run-analysis.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

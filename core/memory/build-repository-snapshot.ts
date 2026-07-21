@@ -1,5 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { RepositorySnapshot } from "../../knowledge/schemas/repository-snapshot";
 import { getRepoRoot, knowledgeDir } from "../shared/workspace";
@@ -23,6 +24,46 @@ async function loadJson<T>(path: string): Promise<T> {
   return JSON.parse(await readFile(path, "utf8")) as T;
 }
 
+export function buildRepositorySnapshot(
+  input: {
+    repositoryName: string;
+    modules: unknown[];
+    hotspots: unknown[];
+    invariants: unknown[];
+    timeline: { eventCount?: number }[];
+    references: {
+      moduleActivity: string;
+      hotspots: string;
+      invariants: string;
+      timeline: string;
+    };
+  },
+  now: string = new Date().toISOString()
+): RepositorySnapshot {
+  return {
+    id: `snapshot.${Date.now()}`,
+
+    createdAt: now,
+
+    metadata: {
+      repositoryName: input.repositoryName,
+      generatedAt: now,
+    },
+
+    summary: {
+      modules: input.modules.length,
+      hotspots: input.hotspots.length,
+      invariants: input.invariants.length,
+      events: input.timeline.reduce(
+        (sum, item) => sum + (item.eventCount ?? 0),
+        0
+      ),
+    },
+
+    references: input.references,
+  };
+}
+
 async function main() {
   const moduleActivityFile = await latestJsonFile(
     knowledgeDir("projections", "module-activity")
@@ -43,37 +84,21 @@ async function main() {
   const modules = await loadJson<any[]>(moduleActivityFile);
   const hotspots = await loadJson<any[]>(hotspotsFile);
   const invariants = await loadJson<any[]>(invariantsFile);
-  const timeline = await loadJson<any[]>(timelineFile);
+  const timeline = await loadJson<{ eventCount?: number }[]>(timelineFile);
 
-  const now = new Date().toISOString();
-
-  const snapshot: RepositorySnapshot = {
-    id: `snapshot.${Date.now()}`,
-
-    createdAt: now,
-
-    metadata: {
-      repositoryName: getRepoRoot().split(/[\\/]/).pop() ?? "repository",
-      generatedAt: now,
-    },
-
-    summary: {
-      modules: modules.length,
-      hotspots: hotspots.length,
-      invariants: invariants.length,
-      events: timeline.reduce(
-        (sum, item) => sum + (item.eventCount ?? 0),
-        0
-      ),
-    },
-
+  const snapshot = buildRepositorySnapshot({
+    repositoryName: getRepoRoot().split(/[\\/]/).pop() ?? "repository",
+    modules,
+    hotspots,
+    invariants,
+    timeline,
     references: {
       moduleActivity: moduleActivityFile,
       hotspots: hotspotsFile,
       invariants: invariantsFile,
       timeline: timelineFile,
     },
-  };
+  });
 
   const outputDir = knowledgeDir("snapshots");
   await mkdir(outputDir, { recursive: true });
@@ -88,7 +113,9 @@ async function main() {
   console.log(`Saved repository snapshot to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

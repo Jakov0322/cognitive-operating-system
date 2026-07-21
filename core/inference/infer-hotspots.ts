@@ -1,10 +1,11 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ConfidenceScore } from "../../knowledge/ontology/confidence";
 import { confidenceFromWeightedCount } from "../shared/confidence";
 import { knowledgeDir } from "../shared/workspace";
 
-type ModuleActivityProjection = {
+export type ModuleActivityProjection = {
   moduleId: string;
   changeCount: number;
   authors: string[];
@@ -41,7 +42,7 @@ function round(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function inferHotspots(
+export function inferHotspots(
   modules: ModuleActivityProjection[]
 ): ModuleHotspot[] {
   const maxChanges = Math.max(...modules.map((m) => m.changeCount), 0);
@@ -116,7 +117,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

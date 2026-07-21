@@ -1,11 +1,12 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { NormalizedEvent } from "../../knowledge/schemas/normalized-event";
 import { classifyEvent } from "../shared/event-classification";
 import { shouldIgnoreForModuleInference } from "../shared/path-filters";
 import { knowledgeDir } from "../shared/workspace";
 
-type TimelineDay = {
+export type TimelineDay = {
   date: string;
   changeCount: number;
   eventCount: number;
@@ -38,7 +39,7 @@ function eventDate(event: NormalizedEvent): string {
   return event.timestamp.slice(0, 10);
 }
 
-function buildActivityTimeline(events: NormalizedEvent[]): TimelineDay[] {
+export function buildActivityTimeline(events: NormalizedEvent[]): TimelineDay[] {
   const days = new Map<string, TimelineDay>();
 
   for (const event of events) {
@@ -114,7 +115,9 @@ async function main() {
   console.log(`Saved to: ${outputPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
