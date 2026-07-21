@@ -1,6 +1,8 @@
 # cognitive-operating-system
 Project Intelligence Layer
 
+The engine below (`core/`, `connectors/`, `knowledge/`, `outputs/`) ships as the `cognitive-os` CLI/MCP package. It's also the backend of a hosted web platform under active development in `apps/` — see [Web platform](#web-platform-phase-0) below.
+
 ## CLI
 
 ```bash
@@ -83,3 +85,33 @@ Add to `claude_desktop_config.json`, pointing `cwd` at the repository to analyze
 Add to `.cursor/mcp.json` the same way as the Claude Code config above.
 
 If the client doesn't support setting `cwd` directly, set the `COGNITIVE_OS_REPO_ROOT` environment variable in the server's `env` config to the absolute path of the repository instead.
+
+## Web platform (Phase 0)
+
+A hosted, multi-tenant web platform is being built on top of the engine above: paste a public repo URL, get a personalized site with a layered overview of it. This is a monorepo (npm workspaces) — the engine stays where it is; the platform lives in `apps/` and `packages/`:
+
+- `apps/web` — Next.js (App Router) frontend, GitHub login via Auth.js
+- `apps/api` — Fastify internal API (never called directly by the browser)
+- `apps/worker` — pg-boss job consumer; will clone repos and run the engine as an isolated subprocess per job
+- `packages/db` — Drizzle ORM schema/migrations (Postgres)
+- `packages/shared-types` — types shared between `apps/web` and `apps/api`
+
+Phase 0 (current): monorepo scaffolding, auth, database schema, and a working job queue — no real ingestion yet. See `.claude/plans` or ask for the roadmap for what's next.
+
+### Local development
+
+```bash
+docker compose up -d postgres
+npm install
+npm run db:migrate --workspace=@cognitive-os/db
+```
+
+Copy `.env.example` to `.env` in `apps/web` (`AUTH_GITHUB_ID`/`AUTH_GITHUB_SECRET` from a GitHub OAuth app, `AUTH_SECRET` from `npx auth secret`) and in `apps/api` (`INTERNAL_API_SECRET`, matching value in both), then:
+
+```bash
+npm run dev --workspace=@cognitive-os/api      # http://localhost:4001
+npm run dev --workspace=@cognitive-os/worker
+npm run dev --workspace=@cognitive-os/web      # http://localhost:3000
+```
+
+`npm run typecheck --workspaces --if-present` and `npm test --workspaces --if-present` run across every app/package; `.github/workflows/test.yml` runs the same checks (plus the engine's own `tsc`/`npm test` and a `next build`) on every push and PR against a real Postgres service container.

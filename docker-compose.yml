@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cognitive_os
+      POSTGRES_PASSWORD: cognitive_os
+      POSTGRES_DB: cognitive_os
+    ports:
+      - "5432:5432"
+    volumes:
+      - cognitive-os-postgres:/var/lib/postgresql/data
+
+volumes:
+  cognitive-os-postgres:

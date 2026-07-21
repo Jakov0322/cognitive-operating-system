@@ -1,0 +1,60 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: cognitive_os
+          POSTGRES_PASSWORD: cognitive_os
+          POSTGRES_DB: cognitive_os
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cognitive_os"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://cognitive_os:cognitive_os@localhost:5432/cognitive_os
+      INTERNAL_API_SECRET: test-secret
+      AUTH_SECRET: test-secret-for-ci-build-only
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check engine (core/connectors/knowledge/outputs)
+        run: npx tsc --noEmit
+
+      - name: Run engine test suite
+        run: npm test
+
+      - name: Apply database migrations
+        run: npm run db:migrate --workspace=@cognitive-os/db
+
+      - name: Type-check every workspace
+        run: npm run typecheck --workspaces --if-present
+
+      - name: Run every workspace's test suite
+        run: npm test --workspaces --if-present
+
+      - name: Build web app
+        run: npm run build --workspace=@cognitive-os/web

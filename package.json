@@ -19,6 +19,10 @@
   "engines": {
     "node": ">=18.19"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "scan:git": "tsx connectors/local/git/scan-git.ts",
     "github:fetch": "tsx connectors/github/fetch-github.ts",
