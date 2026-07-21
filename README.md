@@ -17,6 +17,8 @@ npx cognitive-os check <file> [file...]
 
 Prints a combined risk report for the given file paths: hotspot score, bus factor, architectural invariants that apply, and which contributors have the most expertise in each touched module. Run this before making changes to decide how careful to be and who to loop in. Uses the data from the last `analyze` run — run `analyze` at least once first.
 
+Each `analyze` run also produces `.cognitive-os/outputs/reports/snapshot-trend.md`: a table of every repository snapshot ever taken (module/hotspot/invariant/event counts over time, plus growth signals between each consecutive pair), so you can see whether risk is trending up or down across many runs — not just the latest-vs-previous comparison that `architectural-drift` gives you.
+
 ## PR risk comment (GitHub Action)
 
 `.github/workflows/pr-risk-check.yml` runs `analyze` and posts the same risk report from `check` as a comment on the pull request, so the same signal that's available to agents via MCP is also visible to reviewers. It updates its own comment in place on subsequent pushes instead of piling up duplicates. Uses the repository's default `GITHUB_TOKEN` — no extra secrets required, and no external connector credentials needed since hotspots/bus-factor/invariants/expertise are all derived from local git history.
@@ -39,6 +41,7 @@ Requires `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_TOKEN`, and `PR_NUMBER` in the e
 - `get_bus_factor` — ownership concentration risk per module
 - `get_architectural_invariants` — inferred boundaries and forbidden dependencies
 - `get_architectural_drift` — coupling growth, ownership fragmentation, and other drift signals
+- `get_snapshot_trend` — the full history of repository snapshots over time, not just the latest-vs-previous diff
 - `get_expertise` — expertise areas and strongest modules per contributor
 - `check_change_risk` — combined risk report (hotspot, bus factor, invariants, experts) for a given list of file paths, before you edit them
 

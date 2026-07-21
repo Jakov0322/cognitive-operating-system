@@ -1,11 +1,10 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getRepoRoot, knowledgeDir } from "../shared/workspace";
+import { allJsonFiles, getRepoRoot, knowledgeDir, latestJsonFile } from "../shared/workspace";
 
 const execFileAsync = promisify(execFile);
 
@@ -26,30 +25,6 @@ async function runScript(relativeScriptPath: string, args: string[] = []) {
 
   if (stdout) console.log(stdout);
   if (stderr) console.error(stderr);
-}
-
-async function latestJsonFile(dir: string): Promise<string> {
-  const files = await readdir(dir);
-
-  const jsonFiles = files
-    .filter((file) => file.endsWith(".json"))
-    .sort()
-    .reverse();
-
-  if (jsonFiles.length === 0) {
-    throw new Error(`No JSON files found in ${dir}`);
-  }
-
-  return join(dir, jsonFiles[0]);
-}
-
-async function allJsonFiles(dir: string): Promise<string[]> {
-  const files = await readdir(dir);
-
-  return files
-    .filter((file) => file.endsWith(".json"))
-    .sort()
-    .map((file) => join(dir, file));
 }
 
 export function parseGitScanArgs(argv: string[]): string[] {
@@ -180,6 +155,14 @@ async function main() {
   } catch {
     console.log("Skipping architectural drift inference.");
   }
+
+  await runScript("core/memory/build-snapshot-trend.ts");
+
+  const snapshotTrendFile = await latestJsonFile(
+    knowledgeDir("projections", "snapshot-trend")
+  );
+
+  await runScript("outputs/reports/render-snapshot-trend.ts", [snapshotTrendFile]);
 
   console.log("\nAnalysis completed.");
 }

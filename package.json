@@ -68,6 +68,8 @@
     "rank:context": "tsx core/context/rank-context.ts",
     "snapshot:repository": "tsx core/memory/build-repository-snapshot.ts",
     "compare:snapshots": "tsx core/memory/compare-snapshots.ts",
+    "trend:snapshots": "tsx core/memory/build-snapshot-trend.ts",
+    "render:snapshot-trend": "tsx outputs/reports/render-snapshot-trend.ts",
     "build:embeddings": "tsx core/embeddings/build-embeddings.ts",
     "analyze": "tsx core/orchestration/run-analysis.ts",
     "check": "tsx core/orchestration/run-check-change-risk.ts",

@@ -31,3 +31,12 @@ export async function latestJsonFile(dir: string): Promise<string> {
 
   return join(dir, jsonFiles[0]);
 }
+
+export async function allJsonFiles(dir: string): Promise<string[]> {
+  const files = await readdir(dir);
+
+  return files
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .map((file) => join(dir, file));
+}

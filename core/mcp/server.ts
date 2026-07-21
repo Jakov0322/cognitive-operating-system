@@ -152,6 +152,22 @@ server.registerTool(
 );
 
 server.registerTool(
+  "get_snapshot_trend",
+  {
+    title: "Get Snapshot Trend",
+    description:
+      "Returns the full history of repository snapshots (module/hotspot/invariant/event counts over time, plus the growth signals between each consecutive pair), not just the latest-vs-previous diff. Use this to see whether risk is trending up or down across many analyze runs, not just the most recent one.",
+  },
+  async () => {
+    try {
+      return jsonContent(await readLatestProjection("snapshot-trend"));
+    } catch {
+      return errorContent(notFoundMessage("snapshot trend"));
+    }
+  }
+);
+
+server.registerTool(
   "get_expertise",
   {
     title: "Get Expertise",
