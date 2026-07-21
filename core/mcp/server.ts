@@ -10,6 +10,8 @@ import { CONTEXT_ARTIFACTS } from "../context/artifact-registry";
 import { OwnershipGraph } from "../../knowledge/schemas/ownership-graph";
 import { BusFactorRisk } from "../../knowledge/schemas/bus-factor";
 import { ExpertiseProfile } from "../../knowledge/schemas/expertise-profile";
+import { ArchitecturalInvariant } from "../../knowledge/schemas/architectural-invariant";
+import { checkChangeRisk } from "../inference/check-change-risk";
 
 const server = new McpServer({ name: "cognitive-os", version: "0.1.0" });
 
@@ -34,6 +36,14 @@ async function readLatestProjection<T>(projectionName: string): Promise<T> {
   const file = await latestJsonFile(dir);
   const raw = await readFile(file, "utf8");
   return JSON.parse(raw) as T;
+}
+
+async function readLatestProjectionOrEmpty<T>(projectionName: string): Promise<T[]> {
+  try {
+    return await readLatestProjection<T[]>(projectionName);
+  } catch {
+    return [];
+  }
 }
 
 server.registerTool(
@@ -165,6 +175,35 @@ server.registerTool(
     } catch {
       return errorContent(notFoundMessage("expertise"));
     }
+  }
+);
+
+server.registerTool(
+  "check_change_risk",
+  {
+    title: "Check Change Risk",
+    description:
+      "Given a list of file paths you're about to change, returns a combined risk report per touched module: hotspot score, bus factor, architectural invariants that apply, and which contributors have the most expertise there. Use this before editing files to decide how careful to be and who to loop in.",
+    inputSchema: {
+      files: z.array(z.string()).describe("File paths you're about to change, relative to the repository root"),
+    },
+  },
+  async ({ files }) => {
+    const [hotspots, busFactorRisks, invariants, expertiseProfiles] = await Promise.all([
+      readLatestProjectionOrEmpty<{ moduleId: string; hotspotScore: number; reasons: string[] }>("hotspots"),
+      readLatestProjectionOrEmpty<BusFactorRisk>("bus-factor"),
+      readLatestProjectionOrEmpty<ArchitecturalInvariant>("architectural-invariants"),
+      readLatestProjectionOrEmpty<ExpertiseProfile>("expertise"),
+    ]);
+
+    const report = checkChangeRisk(files, {
+      hotspots,
+      busFactorRisks,
+      invariants,
+      expertiseProfiles,
+    });
+
+    return jsonContent(report);
   }
 );
 

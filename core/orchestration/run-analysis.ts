@@ -1,11 +1,16 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { getRepoRoot, knowledgeDir } from "../shared/workspace";
 
 const execFileAsync = promisify(execFile);
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
 const PACKAGE_ROOT = join(__dirname, "..", "..");
 const TSX_CLI = require.resolve("tsx/cli");

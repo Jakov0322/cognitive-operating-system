@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "description": "Project intelligence layer: analyzes a git repository's history and connected tools (GitHub, Linear, Jira, Slack, CI) to generate ownership, risk, and architecture context for humans and AI agents.",
   "license": "MIT",
+  "type": "module",
   "bin": {
-    "cognitive-os": "./bin/cognitive-os.js"
+    "cognitive-os": "./bin/cognitive-os.cjs"
   },
   "files": [
     "bin",
@@ -69,6 +70,7 @@
     "compare:snapshots": "tsx core/memory/compare-snapshots.ts",
     "build:embeddings": "tsx core/embeddings/build-embeddings.ts",
     "analyze": "tsx core/orchestration/run-analysis.ts",
+    "check": "tsx core/orchestration/run-check-change-risk.ts",
     "test": "vitest run"
   },
   "devDependencies": {
